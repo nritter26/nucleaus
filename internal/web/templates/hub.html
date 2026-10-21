@@ -1,0 +1,431 @@
+{{define "hub_page"}}{{template "head" .}}
+
+<section class="telemetry telemetry--solo" id="telemetry" data-source="/api/metrics">
+  <header class="telemetry-head">
+    <div>
+      <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>LIVE TELEMETRY · CADVISOR</p>
+      <h1 class="telemetry-title">System load</h1>
+    </div>
+    <div class="telemetry-actions">
+      <div class="window-switch" role="group" aria-label="Time window">
+        <button type="button" data-window="5m">5m</button>
+        <button type="button" data-window="15m">15m</button>
+        <button type="button" data-window="1h" class="is-active">1h</button>
+        <button type="button" data-window="6h">6h</button>
+        <button type="button" data-window="24h">24h</button>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="{{.GrafanaURL}}" target="_blank" rel="noopener noreferrer">
+        Grafana<span class="arrow" aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </header>
+
+  <div class="stats" id="stats">
+    <article class="stat" data-stat="cpu">
+      <p class="stat-label">CPU</p>
+      <p class="stat-value"><span data-field="cpuPercent">—</span><span class="stat-unit">%</span></p>
+      <p class="stat-sub" data-field="cpuSub">—</p>
+      <span class="stat-bar"><i data-field="cpuBar" style="width: 0%"></i></span>
+    </article>
+    <article class="stat" data-stat="mem">
+      <p class="stat-label">Memory</p>
+      <p class="stat-value"><span data-field="memPercent">—</span><span class="stat-unit">%</span></p>
+      <p class="stat-sub" data-field="memSub">—</p>
+      <span class="stat-bar"><i data-field="memBar" style="width: 0%"></i></span>
+    </article>
+    <article class="stat" data-stat="rx">
+      <p class="stat-label">Network in</p>
+      <p class="stat-value" data-field="netRx">—</p>
+      <p class="stat-sub" data-field="netRxSub">—</p>
+    </article>
+    <article class="stat" data-stat="tx">
+      <p class="stat-label">Network out</p>
+      <p class="stat-value" data-field="netTx">—</p>
+      <p class="stat-sub" data-field="netTxSub">—</p>
+    </article>
+    <article class="stat" data-stat="containers">
+      <p class="stat-label">Containers</p>
+      <p class="stat-value" data-field="containers">—</p>
+      <p class="stat-sub" data-field="containersSub">tracked by cAdvisor</p>
+    </article>
+  </div>
+
+  <div class="charts">
+    <figure class="chart-card" data-chart="cpu">
+      <figcaption><span>CPU load</span><em>%</em></figcaption>
+      <canvas height="180"></canvas>
+      <p class="chart-empty">waiting for samples</p>
+    </figure>
+    <figure class="chart-card" data-chart="mem">
+      <figcaption><span>Memory</span><em>GiB</em></figcaption>
+      <canvas height="180"></canvas>
+      <p class="chart-empty">waiting for samples</p>
+    </figure>
+    <figure class="chart-card" data-chart="rx">
+      <figcaption><span>Network in</span><em>bytes/s</em></figcaption>
+      <canvas height="180"></canvas>
+      <p class="chart-empty">waiting for samples</p>
+    </figure>
+    <figure class="chart-card" data-chart="tx">
+      <figcaption><span>Network out</span><em>bytes/s</em></figcaption>
+      <canvas height="180"></canvas>
+      <p class="chart-empty">waiting for samples</p>
+    </figure>
+  </div>
+
+  <div class="table-card">
+    <div class="table-head">
+      <h2>Containers</h2>
+      <span id="container-count" data-field="containerCount">—</span>
+    </div>
+    <div class="table-scroll">
+      <table class="ctable">
+        <thead>
+          <tr><th>Container</th><th>CPU</th><th>Memory</th><th>In</th><th>Out</th></tr>
+        </thead>
+        <tbody id="container-rows">
+          <tr><td colspan="5" class="table-empty">loading container stats…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p class="telemetry-status" id="telemetry-status">
+    <span class="dot" aria-hidden="true"></span><span data-field="status">Connecting to Prometheus bridge…</span>
+  </p>
+</section>
+
+<script src="/static/dashboard.js" defer></script>
+{{template "foot" .}}{{end}}
+
+
+{{define "group"}}
+<section class="group" id="{{.Key}}">
+  <header class="group-head reveal">
+    <span class="group-tag">{{.Tag}}</span>
+    <h2 class="group-title">{{.Label}}</h2>
+    <p class="group-blurb">{{.Blurb}}</p>
+  </header>
+  <div class="cards">
+    {{range $i, $l := .Items}}
+    <a class="card reveal" style="--i: {{$i}}" href="{{$l.URL}}"{{if $l.NewTab}} target="_blank" rel="noopener noreferrer"{{end}}>
+      <span class="card-sheen" aria-hidden="true"></span>
+      <span class="card-top">
+        <span class="card-icon">
+          {{if $l.Logo}}<img src="/logos/{{$l.Logo}}.png" alt="" loading="lazy" />{{else}}<span class="monogram">{{$l.Initials}}</span>{{end}}
+        </span>
+        {{if $l.Meta}}<span class="card-meta">{{$l.Meta}}</span>{{end}}
+      </span>
+      <span class="card-name">{{$l.Name}}</span>
+      <span class="card-desc">{{$l.Desc}}</span>
+      <span class="card-foot">
+        <span class="card-go">Open{{if $l.NewTab}}<span class="arrow" aria-hidden="true">↗</span>{{else}}<span class="arrow" aria-hidden="true">→</span>{{end}}</span>
+      </span>
+    </a>
+    {{end}}
+  </div>
+</section>
+{{end}}
+
+
+{{define "section_page"}}{{template "head" .}}
+
+<div class="page-head">
+  <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span>{{.Group.Label}}</p>
+  <h1 class="page-title grad">{{.Group.Label}}</h1>
+  <p class="page-sub">{{.Group.Blurb}}</p>
+</div>
+
+{{template "group" .Group}}
+
+{{template "foot" .}}{{end}}
+
+
+{{define "catalog_page"}}{{template "head" .}}
+
+<div class="page-head">
+  <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span>{{.Group.Label}}</p>
+  <h1 class="page-title grad">{{.Group.Label}}</h1>
+  <p class="page-sub">{{.Group.Blurb}}</p>
+</div>
+
+<section class="tiles">
+  {{range $i, $l := .Groups}}
+    {{range $j, $item := $l.Items}}
+    <a class="tile reveal" style="--i: {{$j}}" href="{{$item.URL}}">
+      <span class="tile-glow" aria-hidden="true"></span>
+      <span class="tile-icon">
+        {{if $item.Logo}}<img src="/logos/{{$item.Logo}}.png" alt="" loading="lazy" />{{else}}<span class="monogram monogram--lg">{{$item.Initials}}</span>{{end}}
+      </span>
+      <span class="tile-name">{{$item.Name}}</span>
+      <span class="tile-desc">{{$item.Desc}}</span>
+      <span class="tile-go">Enter<span aria-hidden="true">→</span></span>
+    </a>
+    {{end}}
+  {{end}}
+</section>
+
+{{template "foot" .}}{{end}}
+
+
+{{define "cheatsheet_page"}}{{template "head" .}}
+
+<div class="page-head">
+  <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span>REFERENCE</p>
+  <h1 class="page-title grad">Cheat Sheet</h1>
+  <p class="page-sub">{{.CheatTotal}} commands and snippets pulled from the reference docs.</p>
+</div>
+
+{{if .CheatError}}
+<div class="cheat-empty">
+  <p>Could not read the command docs.</p>
+  <p class="cheat-error">{{.CheatError}}</p>
+</div>
+{{else}}
+
+<div class="cheat-controls">
+  <label class="cheat-search">
+    <span class="sr-only">Search commands</span>
+    <input id="cheat-search" type="search" placeholder="Search commands, flags, packages…" autocomplete="off" spellcheck="false" />
+    <span class="cheat-count" id="cheat-count">{{.CheatTotal}} commands</span>
+  </label>
+  <div class="cheat-tabs" id="cheat-tabs" role="tablist">
+    <button type="button" class="is-active" data-doc="all" role="tab">All</button>
+    {{range .CheatDocs}}
+    <button type="button" data-doc="{{.Slug}}" role="tab">{{.Label}}<span>{{.Count}}</span></button>
+    {{end}}
+  </div>
+</div>
+
+<div class="cheat-docs" id="cheat-docs">
+  {{range .CheatDocs}}
+  <section class="cheat-doc" data-doc="{{.Slug}}">
+    <header class="cheat-doc-head">
+      <h2>{{.Label}}</h2>
+      <p>{{.Title}}</p>
+      <span>{{.Count}} entries</span>
+    </header>
+    {{range .Sections}}
+    <div class="cheat-section">
+      <h3>{{.Title}}</h3>
+      <div class="cheat-entries">
+        {{range .Entries}}
+        <article class="cheat-entry" data-search="{{.Title}} {{.Command}} {{.Desc}}">
+          {{if ne .Title .Command}}<h4>{{.Title}}</h4>{{end}}
+          {{if .Command}}
+          <div class="cheat-cmd">
+            <pre><code>{{.Command}}</code></pre>
+            <button class="copy" type="button" data-copy aria-label="Copy command">copy</button>
+          </div>
+          {{end}}
+          {{if .Desc}}<p>{{.Desc}}</p>{{end}}
+        </article>
+        {{end}}
+      </div>
+    </div>
+    {{end}}
+  </section>
+  {{end}}
+</div>
+
+<p class="cheat-none" id="cheat-none" hidden>No commands match that search.</p>
+
+{{end}}
+
+<script src="/static/cheatsheet.js" defer></script>
+
+{{template "foot" .}}{{end}}
+
+
+{{define "doc_page"}}{{template "head" .}}
+
+<div class="page-head">
+  <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span><span>{{.Trail}}</span><span aria-hidden="true">/</span><span class="grad">{{.Doc.Label}}</span></p>
+  <h1 class="page-title grad">
+    {{if .Doc.Logo}}<img class="page-logo" src="/logos/{{.Doc.Logo}}.png" alt="" loading="lazy" />{{end}}{{.Doc.Label}}
+  </h1>
+  <p class="page-sub">{{.Doc.Desc}}</p>
+</div>
+
+{{if .Doc.Error}}
+<div class="cheat-empty">
+  <p>Could not read the {{.Trail}} docs.</p>
+  <p class="cheat-error">{{.Doc.Error}}</p>
+</div>
+{{else}}
+
+{{if .Doc.Resources}}
+<aside class="doc-res reveal" aria-label="Learning resources">
+  {{range .Doc.Resources}}
+  <a class="doc-res-link" href="{{.URL}}" target="_blank" rel="noopener noreferrer">
+    <span class="doc-res-kind doc-res-kind--{{.Kind}}">{{.Kind}}</span>
+    <span class="doc-res-body">
+      <strong>{{.Name}}</strong>
+      <small>{{.Desc}}</small>
+    </span>
+    <span class="doc-res-arrow" aria-hidden="true">↗</span>
+  </a>
+  {{end}}
+</aside>
+{{end}}
+
+<div class="cheat-controls">
+  <label class="cheat-search">
+    <span class="sr-only">Search sections</span>
+    <input id="doc-search" type="search" placeholder="Search sections, snippets, notes…" autocomplete="off" spellcheck="false" />
+    <span class="cheat-count" id="doc-count">{{.Doc.Count}} sections</span>
+  </label>
+  {{if gt (len .Doc.Tabs) 1}}
+  <div class="cheat-tabs" id="doc-tabs" role="tablist">
+    <button type="button" class="is-active" data-doc="all" role="tab">All</button>
+    {{range .Doc.Tabs}}
+    <button type="button" data-doc="{{.Slug}}" role="tab">{{.Label}}<span>{{.Count}}</span></button>
+    {{end}}
+  </div>
+  {{end}}
+</div>
+
+<div class="doc-groups" id="doc-groups">
+  {{range .Doc.Tabs}}
+  <section class="doc-group" data-doc="{{.Slug}}">
+    <header class="doc-group-head reveal">
+      <h2>{{.Label}}</h2>
+      {{if .Title}}<p>{{.Title}}</p>{{end}}
+      <span>{{.Count}} sections</span>
+    </header>
+    {{range $i, $s := .Sections}}
+    <details class="doc-sec reveal" style="--i: {{$i}}" id="{{$s.ID}}" data-search="{{$s.Query}}"{{if $s.Open}} open{{end}} data-first="{{if eq $i 0}}1{{else}}0{{end}}">
+      <summary>
+        <span class="doc-sec-name">{{$s.Heading}}</span>
+        {{if $s.Count}}<span class="doc-sec-count">{{$s.Count}} snippets</span>{{end}}
+      </summary>
+      <div class="doc-body">{{$s.Body}}</div>
+    </details>
+    {{end}}
+  </section>
+  {{end}}
+</div>
+
+<p class="cheat-none" id="doc-none" hidden>No sections match that search.</p>
+
+{{end}}
+
+<script src="/static/docs.js" defer></script>
+
+{{template "foot" .}}{{end}}
+
+
+{{define "tts_page"}}{{template "head" .}}
+
+<div class="page-head">
+  <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span><span>AI Tools</span><span aria-hidden="true">/</span><span class="grad">TTS</span></p>
+  <h1 class="page-title grad"><img class="page-logo" src="/logos/tts.png" alt="" />Curriculum read-aloud</h1>
+  <p class="page-sub">Every learning track narrated in a natural voice. Pick a section, set the pace, and let it play.</p>
+</div>
+
+<section class="tts" id="tts-root" data-voice="{{.Tts.Voice}}">
+  <div class="tts-player reveal">
+    <div class="tts-track-row" role="tablist" id="tts-tracks">
+      {{range .Tts.Tracks}}
+      <button type="button" class="tts-track{{if eq .Key "go"}} is-active{{end}}" data-track="{{.Key}}" role="tab" aria-selected="{{if eq .Key "go"}}true{{else}}false{{end}}">{{.Name}}<span>{{len .Items}}</span></button>
+      {{end}}
+    </div>
+
+    <div class="tts-player-box">
+      <div class="tts-sec-meta">
+        <span class="tts-sec-n" id="tts-sec-n">—</span>
+        <h2 class="tts-sec-title" id="tts-sec-title">Choose a section to listen to</h2>
+      </div>
+
+      <audio id="tts-audio" preload="metadata"></audio>
+
+      <div class="tts-timebar">
+        <span class="tts-time" id="tts-time-cur">0:00</span>
+        <input id="tts-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek" />
+        <span class="tts-time" id="tts-time-total">0:00</span>
+      </div>
+
+      <div class="tts-controls">
+        <button type="button" class="tts-ctl" id="tts-prev" title="Previous section (rewind)">&#9664;&#124;</button>
+        <button type="button" class="tts-ctl tts-ctl-back" id="tts-back" title="Back 10s">&#8647;</button>
+        <button type="button" class="tts-ctl tts-ctl-play" id="tts-play" title="Play / pause" aria-label="Play">&#9654;</button>
+        <button type="button" class="tts-ctl tts-ctl-fwd" id="tts-fwd" title="Forward 10s">&#8649;</button>
+        <button type="button" class="tts-ctl" id="tts-next" title="Next section (skip)">&#124;&#9654;</button>
+
+        <label class="tts-opt tts-speed">
+          <span class="sr-only">Speed</span>
+          <select id="tts-rate" aria-label="Playback speed">
+            <option value="0.75">0.75&times;</option>
+            <option value="1" selected>1&times;</option>
+            <option value="1.25">1.25&times;</option>
+            <option value="1.5">1.5&times;</option>
+            <option value="1.75">1.75&times;</option>
+            <option value="2">2&times;</option>
+          </select>
+        </label>
+        <label class="tts-opt tts-vol">
+          <span class="sr-only">Volume</span>
+          <span class="tts-vol-icon" aria-hidden="true">&#128266;</span>
+          <input id="tts-vol" type="range" min="0" max="100" value="100" step="1" aria-label="Volume" />
+          <span class="tts-vol-val" id="tts-vol-val">100</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  {{range .Tts.Tracks}}
+  {{$t := .}}
+  <div class="tts-list reveal" data-track-list="{{$t.Key}}"{{if ne $t.Key "go"}} hidden{{end}}>
+    <ol class="tts-sections">
+      {{range $t.Items}}
+      <li>
+        <button type="button" class="tts-sec" data-src="/tts/full/{{.File}}" data-n="{{.N}}" data-track="{{$t.Key}}">
+          <span class="tts-sec-num">{{.N}}</span>
+          <span class="tts-sec-name">{{.Title}}</span>
+          <span class="tts-sec-play" aria-hidden="true">&#9654;</span>
+        </button>
+      </li>
+      {{end}}
+    </ol>
+  </div>
+  {{end}}
+</section>
+
+<script src="/static/tts.js" defer></script>
+
+{{template "foot" .}}{{end}}
+
+{{define "soon_page"}}{{template "head" .}}
+
+<section class="soon">
+  <div class="soon-panel reveal">
+    <div class="soon-logo">
+      {{if .Item.Logo}}<img src="/logos/{{.Item.Logo}}.png" alt="" />{{else}}<span class="monogram monogram--xl">{{.Item.Initials}}</span>{{end}}
+      <span class="soon-scan" aria-hidden="true"></span>
+    </div>
+    <p class="eyebrow">{{if .Trail}}{{.Trail}} · {{end}}MODULE<strong class="soon-state">{{.Item.Meta}}</strong></p>
+    <h1 class="page-title grad">{{.Item.Name}}</h1>
+    <p class="page-sub">{{.Item.Desc}}</p>
+    <p class="soon-note">
+      <span class="pulse" aria-hidden="true"></span>Interface is being wired up. Check back after the next deploy.
+    </p>
+
+    {{if .Siblings}}
+    <div class="soon-siblings">
+      <p class="soon-siblings-label">Other {{.Trail}} modules</p>
+      <div class="soon-sibling-list">
+        {{range .Siblings}}
+        <a class="chip" href="{{.URL}}">
+          {{if .Logo}}<img src="/logos/{{.Logo}}.png" alt="" loading="lazy" />{{else}}<span class="monogram">{{.Initials}}</span>{{end}}
+          {{.Name}}
+        </a>
+        {{end}}
+      </div>
+    </div>
+    {{end}}
+
+    <a class="btn btn-ghost" href="/hub">Back to hub</a>
+  </div>
+</section>
+
+{{template "foot" .}}{{end}}

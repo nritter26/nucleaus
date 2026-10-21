@@ -1,0 +1,17 @@
+{{define "users_page"}} {{template "head" .}}
+<h1>Users</h1>
+<form
+  hx-post="/users"
+  hx-target="#users"
+  hx-swap="beforeend"
+  hx-on::after-request="this.reset()"
+>
+  <input name="name" required />
+  <button>Add</button>
+</form>
+<ul id="users">
+  {{range .Users}}{{template "user_row" .}}{{end}}
+</ul>
+{{template "foot"}} {{end}} {{define "user_row"}}
+<li>{{.Name}}</li>
+{{end}}

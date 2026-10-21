@@ -1,0 +1,490 @@
+{
+ "voice": "en-GB-RyanNeural",
+ "tracks": {
+  "go": {
+   "name": "Go",
+   "items": [
+    {
+     "n": 1,
+     "title": "How to Use This Curriculum",
+     "file": "go/001-how-to-use-this-curriculum-b87714.mp3"
+    },
+    {
+     "n": 2,
+     "title": "Pre-Course Setup",
+     "file": "go/002-pre-course-setup-91f5be.mp3"
+    },
+    {
+     "n": 3,
+     "title": "Recommended Learning Order",
+     "file": "go/003-recommended-learning-order-b5afaf.mp3"
+    },
+    {
+     "n": 4,
+     "title": "Lesson 1: Go Philosophy and Setup  *(go.json: Stage 1, Topics 1.1-1.3)*",
+     "file": "go/004-lesson-1-go-philosophy-and-setup-gojson-st-88a6f8.mp3"
+    },
+    {
+     "n": 5,
+     "title": "Lesson 2: Variables, Types, and Constants  *(go.json: Stage 2, Topics 2.1-2.5)*",
+     "file": "go/005-lesson-2-variables-types-and-constants-goj-acd813.mp3"
+    },
+    {
+     "n": 6,
+     "title": "Lesson 3: Control Flow  *(go.json: Stage 2, Topics 2.2)*",
+     "file": "go/006-lesson-3-control-flow-gojson-stage-2-topic-391d3d.mp3"
+    },
+    {
+     "n": 7,
+     "title": "Lesson 4: Functions  *(go.json: Stage 2, Topic 2.3)*",
+     "file": "go/007-lesson-4-functions-gojson-stage-2-topic-23-e80c92.mp3"
+    },
+    {
+     "n": 8,
+     "title": "Lesson 5: Core Data Structures  *(go.json: Stage 2, Topics 2.4-2.5)*",
+     "file": "go/008-lesson-5-core-data-structures-gojson-stage-44bd4f.mp3"
+    },
+    {
+     "n": 9,
+     "title": "Lesson 6: Methods, Interfaces, and Composition  *(go.json: Stage 3, Topics 3.1-3.2)*",
+     "file": "go/009-lesson-6-methods-interfaces-and-compositio-017d88.mp3"
+    },
+    {
+     "n": 10,
+     "title": "Lesson 7: Error Handling  *(go.json: Stage 3, Topic 3.4)*",
+     "file": "go/010-lesson-7-error-handling-gojson-stage-3-top-95c0e0.mp3"
+    },
+    {
+     "n": 11,
+     "title": "Lesson 8: Packages, Modules, and Organization  *(go.json: Stage 4, Topics 4.1-4.4)*",
+     "file": "go/011-lesson-8-packages-modules-and-organization-56d394.mp3"
+    },
+    {
+     "n": 12,
+     "title": "Optional Deep Dive: Generics  *(go.json: Stage 3, Topic 3.3; study after the backend path)*",
+     "file": "go/012-optional-deep-dive-generics-gojson-stage-3-844f1f.mp3"
+    },
+    {
+     "n": 13,
+     "title": "Lesson 10: Testing  *(go.json: Stage 8, Topics 8.1-8.5)*",
+     "file": "go/013-lesson-10-testing-gojson-stage-8-topics-81-963385.mp3"
+    },
+    {
+     "n": 14,
+     "title": "Lesson 11: Files and I/O  *(go.json: Stage 7, Topics 7.1-7.4)*",
+     "file": "go/014-lesson-11-files-and-io-gojson-stage-7-topi-075118.mp3"
+    },
+    {
+     "n": 15,
+     "title": "Lesson 12: HTTP Servers  *(go.json: Stage 9, Topics 9.1-9.4)*",
+     "file": "go/015-lesson-12-http-servers-gojson-stage-9-topi-ec7225.mp3"
+    },
+    {
+     "n": 16,
+     "title": "Lesson 13: SQL and PostgreSQL  *(go.json: Stage 10, Topics 10.1-10.5)*",
+     "file": "go/016-lesson-13-sql-and-postgresql-gojson-stage--c0043f.mp3"
+    },
+    {
+     "n": 17,
+     "title": "Lesson 14: API Design and Authentication  *(go.json: Stage 11, Topics 11.1-11.4)*",
+     "file": "go/017-lesson-14-api-design-and-authentication-go-646749.mp3"
+    },
+    {
+     "n": 18,
+     "title": "Lesson 15: Concurrency Projects  *(go.json: Stage 6, Milestone 2)*",
+     "file": "go/018-lesson-15-concurrency-projects-gojson-stag-2a5b84.mp3"
+    },
+    {
+     "n": 19,
+     "title": "Lesson 16: Final Project - Complete Go Service  *(go.json: Stages 9-14)*",
+     "file": "go/019-lesson-16-final-project---complete-go-serv-1da115.mp3"
+    },
+    {
+     "n": 20,
+     "title": "Post-Course: Continuing Your Go Journey",
+     "file": "go/020-post-course-continuing-your-go-journey-8acf33.mp3"
+    },
+    {
+     "n": 21,
+     "title": "Course Assessment",
+     "file": "go/021-course-assessment-1a63ec.mp3"
+    }
+   ]
+  },
+  "typescript": {
+   "name": "TypeScript",
+   "items": [
+    {
+     "n": 1,
+     "title": "How to Use This Curriculum",
+     "file": "typescript/001-how-to-use-this-curriculum-b87714.mp3"
+    },
+    {
+     "n": 2,
+     "title": "Pre-Course Setup",
+     "file": "typescript/002-pre-course-setup-91f5be.mp3"
+    },
+    {
+     "n": 3,
+     "title": "Lesson 1: Introduction & Prerequisites *(core, ~2-4 days)*",
+     "file": "typescript/003-lesson-1-introduction-prerequisites-core-2-07848b.mp3"
+    },
+    {
+     "n": 4,
+     "title": "Lesson 2: Basic Types & Annotations *(core, ~1 week)*",
+     "file": "typescript/004-lesson-2-basic-types-annotations-core-1-we-d6a822.mp3"
+    },
+    {
+     "n": 5,
+     "title": "Lesson 3: Functions in TypeScript *(core, ~1 week)*",
+     "file": "typescript/005-lesson-3-functions-in-typescript-core-1-we-a74179.mp3"
+    },
+    {
+     "n": 6,
+     "title": "Lesson 4: Custom Types & Type Definition *(core, ~1-2 weeks)*",
+     "file": "typescript/006-lesson-4-custom-types-type-definition-core-29444c.mp3"
+    },
+    {
+     "n": 7,
+     "title": "Lesson 5: Narrowing & Control Flow *(core, ~1 week)*",
+     "file": "typescript/007-lesson-5-narrowing-control-flow-core-1-wee-e8fbdb.mp3"
+    },
+    {
+     "n": 8,
+     "title": "Lesson 6: Generics *(core, ~1-2 weeks)*",
+     "file": "typescript/008-lesson-6-generics-core-1-2-weeks-dc22cb.mp3"
+    },
+    {
+     "n": 9,
+     "title": "Lesson 7: Built-in Utility Types *(core, ~1 week)*",
+     "file": "typescript/009-lesson-7-built-in-utility-types-core-1-wee-def41d.mp3"
+    },
+    {
+     "n": 10,
+     "title": "Lesson 8: Type Operators & Indexed Access *(important, ~3-5 days)*",
+     "file": "typescript/010-lesson-8-type-operators-indexed-access-imp-fa61c4.mp3"
+    },
+    {
+     "n": 11,
+     "title": "Lesson 9: Advanced Type Manipulation *(important, ~2-3 weeks)*",
+     "file": "typescript/011-lesson-9-advanced-type-manipulation-import-eac2b5.mp3"
+    },
+    {
+     "n": 12,
+     "title": "Lesson 10: Object-Oriented TypeScript *(optional, ~1 week)*",
+     "file": "typescript/012-lesson-10-object-oriented-typescript-optio-ad666c.mp3"
+    },
+    {
+     "n": 13,
+     "title": "Lesson 11: TypeScript Configuration (`tsconfig.json`) *(important, ~3-5 days)*",
+     "file": "typescript/013-lesson-11-typescript-configuration-tsconfi-c62b7d.mp3"
+    },
+    {
+     "n": 14,
+     "title": "Lesson 12: Modules & Type Definitions *(important, ~1 week)*",
+     "file": "typescript/014-lesson-12-modules-type-definitions-importa-1f3265.mp3"
+    },
+    {
+     "n": 15,
+     "title": "Lesson 13: Tooling & Quality *(important, ~1 week)*",
+     "file": "typescript/015-lesson-13-tooling-quality-important-1-week-ebf1c3.mp3"
+    },
+    {
+     "n": 16,
+     "title": "Lesson 14: Frameworks & Real-World Projects *(important, ~2-4 weeks)*",
+     "file": "typescript/016-lesson-14-frameworks-real-world-projects-i-be8445.mp3"
+    },
+    {
+     "n": 17,
+     "title": "Recommended Project Progression",
+     "file": "typescript/017-recommended-project-progression-5fe687.mp3"
+    },
+    {
+     "n": 18,
+     "title": "Resources",
+     "file": "typescript/018-resources-018942.mp3"
+    },
+    {
+     "n": 19,
+     "title": "Course Assessment",
+     "file": "typescript/019-course-assessment-1a63ec.mp3"
+    }
+   ]
+  },
+  "postgres": {
+   "name": "Postgres",
+   "items": [
+    {
+     "n": 1,
+     "title": "How to use this curriculum",
+     "file": "postgres/001-how-to-use-this-curriculum-b87714.mp3"
+    },
+    {
+     "n": 2,
+     "title": "Contents",
+     "file": "postgres/002-contents-4a756c.mp3"
+    },
+    {
+     "n": 3,
+     "title": "Stage 0: Prerequisites",
+     "file": "postgres/003-stage-0-prerequisites-ebad66.mp3"
+    },
+    {
+     "n": 4,
+     "title": "Stage 1: Installation and First Steps",
+     "file": "postgres/004-stage-1-installation-and-first-steps-f143ba.mp3"
+    },
+    {
+     "n": 5,
+     "title": "Stage 2: SQL Fundamentals",
+     "file": "postgres/005-stage-2-sql-fundamentals-dfab99.mp3"
+    },
+    {
+     "n": 6,
+     "title": "Stage 3: Schema Design and Data Types",
+     "file": "postgres/006-stage-3-schema-design-and-data-types-6cf6b2.mp3"
+    },
+    {
+     "n": 7,
+     "title": "Stage 4: Transactions, MVCC, and Concurrency",
+     "file": "postgres/007-stage-4-transactions-mvcc-and-concurrency-d9c630.mp3"
+    },
+    {
+     "n": 8,
+     "title": "Stage 5: Advanced SQL",
+     "file": "postgres/008-stage-5-advanced-sql-9065e7.mp3"
+    },
+    {
+     "n": 9,
+     "title": "Stage 6: Server-Side Programming",
+     "file": "postgres/009-stage-6-server-side-programming-244e45.mp3"
+    },
+    {
+     "n": 10,
+     "title": "Stage 7: Indexing",
+     "file": "postgres/010-stage-7-indexing-7b3b4d.mp3"
+    },
+    {
+     "n": 11,
+     "title": "Stage 8: Query Planning and Optimization",
+     "file": "postgres/011-stage-8-query-planning-and-optimization-4dcbf8.mp3"
+    },
+    {
+     "n": 12,
+     "title": "Stage 9: Configuration and Performance Tuning",
+     "file": "postgres/012-stage-9-configuration-and-performance-tuni-f71a88.mp3"
+    },
+    {
+     "n": 13,
+     "title": "Stage 10: Roles and Security",
+     "file": "postgres/013-stage-10-roles-and-security-d7d356.mp3"
+    },
+    {
+     "n": 14,
+     "title": "Stage 11: Backup and Recovery",
+     "file": "postgres/014-stage-11-backup-and-recovery-e423a0.mp3"
+    },
+    {
+     "n": 15,
+     "title": "Stage 12: Replication and High Availability",
+     "file": "postgres/015-stage-12-replication-and-high-availability-0485ee.mp3"
+    },
+    {
+     "n": 16,
+     "title": "Stage 13: Advanced Features and Extensions",
+     "file": "postgres/016-stage-13-advanced-features-and-extensions-086f4b.mp3"
+    },
+    {
+     "n": 17,
+     "title": "Stage 14: Migrations and Upgrades",
+     "file": "postgres/017-stage-14-migrations-and-upgrades-d9349e.mp3"
+    },
+    {
+     "n": 18,
+     "title": "Stage 15: Operations, Monitoring, and Ecosystem",
+     "file": "postgres/018-stage-15-operations-monitoring-and-ecosyst-2ec4d8.mp3"
+    },
+    {
+     "n": 19,
+     "title": "Recommended projects",
+     "file": "postgres/019-recommended-projects-41dd70.mp3"
+    },
+    {
+     "n": 20,
+     "title": "Completion checklist",
+     "file": "postgres/020-completion-checklist-2b76ad.mp3"
+    },
+    {
+     "n": 21,
+     "title": "Resources",
+     "file": "postgres/021-resources-018942.mp3"
+    }
+   ]
+  },
+  "docker": {
+   "name": "Docker",
+   "items": [
+    {
+     "n": 1,
+     "title": "How to Use This Curriculum",
+     "file": "docker/001-how-to-use-this-curriculum-b87714.mp3"
+    },
+    {
+     "n": 2,
+     "title": "Learning Paths",
+     "file": "docker/002-learning-paths-800ed2.mp3"
+    },
+    {
+     "n": 3,
+     "title": "Stages",
+     "file": "docker/003-stages-6075ab.mp3"
+    },
+    {
+     "n": 4,
+     "title": "Recommended Projects",
+     "file": "docker/004-recommended-projects-41dd70.mp3"
+    },
+    {
+     "n": 5,
+     "title": "Completion Checklist",
+     "file": "docker/005-completion-checklist-2b76ad.mp3"
+    },
+    {
+     "n": 6,
+     "title": "Additional Resources",
+     "file": "docker/006-additional-resources-0b35ae.mp3"
+    },
+    {
+     "n": 7,
+     "title": "What Changed in This Revision",
+     "file": "docker/007-what-changed-in-this-revision-35eb50.mp3"
+    }
+   ]
+  },
+  "rust": {
+   "name": "Rust",
+   "items": [
+    {
+     "n": 1,
+     "title": "How to Use This Curriculum",
+     "file": "rust/001-how-to-use-this-curriculum-b87714.mp3"
+    },
+    {
+     "n": 2,
+     "title": "Roadmap",
+     "file": "rust/002-roadmap-02acf9.mp3"
+    },
+    {
+     "n": 3,
+     "title": "Module 0: Setup and Light Prerequisites",
+     "file": "rust/003-module-0-setup-and-light-prerequisites-97a8c1.mp3"
+    },
+    {
+     "n": 4,
+     "title": "Module 1: Getting Started with Rust",
+     "file": "rust/004-module-1-getting-started-with-rust-961544.mp3"
+    },
+    {
+     "n": 5,
+     "title": "Module 2: Fundamentals",
+     "file": "rust/005-module-2-fundamentals-71ca2b.mp3"
+    },
+    {
+     "n": 6,
+     "title": "Module 3: Ownership and Borrowing",
+     "file": "rust/006-module-3-ownership-and-borrowing-49abdd.mp3"
+    },
+    {
+     "n": 7,
+     "title": "Module 4: Structs, Enums, and Pattern Matching",
+     "file": "rust/007-module-4-structs-enums-and-pattern-matchin-46b517.mp3"
+    },
+    {
+     "n": 8,
+     "title": "Module 5: Packages, Crates, and Modules",
+     "file": "rust/008-module-5-packages-crates-and-modules-82dd9f.mp3"
+    },
+    {
+     "n": 9,
+     "title": "Module 6: Collections and Strings",
+     "file": "rust/009-module-6-collections-and-strings-90165f.mp3"
+    },
+    {
+     "n": 10,
+     "title": "Module 7: Error Handling",
+     "file": "rust/010-module-7-error-handling-aeccd5.mp3"
+    },
+    {
+     "n": 11,
+     "title": "Module 8: Generics, Traits, and Lifetimes",
+     "file": "rust/011-module-8-generics-traits-and-lifetimes-27c3ec.mp3"
+    },
+    {
+     "n": 12,
+     "title": "Module 9: Testing and Documentation",
+     "file": "rust/012-module-9-testing-and-documentation-fd0d56.mp3"
+    },
+    {
+     "n": 13,
+     "title": "Module 10: Closures and Iterators",
+     "file": "rust/013-module-10-closures-and-iterators-d39933.mp3"
+    },
+    {
+     "n": 14,
+     "title": "Module 11: Smart Pointers and Interior Mutability",
+     "file": "rust/014-module-11-smart-pointers-and-interior-muta-f19ef3.mp3"
+    },
+    {
+     "n": 15,
+     "title": "Module 12: Concurrency with Threads",
+     "file": "rust/015-module-12-concurrency-with-threads-2001db.mp3"
+    },
+    {
+     "n": 16,
+     "title": "Module 13: Asynchronous Programming",
+     "file": "rust/016-module-13-asynchronous-programming-5839d1.mp3"
+    },
+    {
+     "n": 17,
+     "title": "Module 14: Logging and Observability",
+     "file": "rust/017-module-14-logging-and-observability-cfb60a.mp3"
+    },
+    {
+     "n": 18,
+     "title": "Module 15: Web Development",
+     "file": "rust/018-module-15-web-development-13aee2.mp3"
+    },
+    {
+     "n": 19,
+     "title": "Module 16: Systems Programming and CLIs",
+     "file": "rust/019-module-16-systems-programming-and-clis-6818ac.mp3"
+    },
+    {
+     "n": 20,
+     "title": "Module 17: Unsafe Rust, FFI, and Macros",
+     "file": "rust/020-module-17-unsafe-rust-ffi-and-macros-7a5c40.mp3"
+    },
+    {
+     "n": 21,
+     "title": "Module 18: Crates, Cargo, and Publishing",
+     "file": "rust/021-module-18-crates-cargo-and-publishing-29e568.mp3"
+    },
+    {
+     "n": 22,
+     "title": "Module 19: Capstone and Going Deeper",
+     "file": "rust/022-module-19-capstone-and-going-deeper-367587.mp3"
+    },
+    {
+     "n": 23,
+     "title": "Core Resources",
+     "file": "rust/023-core-resources-00c7c6.mp3"
+    },
+    {
+     "n": 24,
+     "title": "What Changed From the Original Curriculum",
+     "file": "rust/024-what-changed-from-the-original-curriculum-1d87fc.mp3"
+    }
+   ]
+  }
+ }
+}

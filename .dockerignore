@@ -1,0 +1,7 @@
+node_modules
+.git
+.github
+.env
+*.log
+tmp_preview
+internal/web/tts/__pycache__

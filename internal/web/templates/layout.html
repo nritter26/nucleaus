@@ -1,0 +1,93 @@
+{{define "head"}}<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#07030d" />
+    <title>{{.Title}} · Mallard</title>
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="/static/hub.css" />
+    <script src="/static/htmx.min.js" defer></script>
+    <script src="/static/highlight.js" defer></script>
+    <script src="/static/hub.js" defer></script>
+  </head>
+  <body data-page="{{.Page}}">
+    <a class="skip" href="#main">Skip to content</a>
+
+    <div class="fx" aria-hidden="true">
+      <div class="fx-grid"></div>
+      <div class="fx-orb fx-orb--a"></div>
+      <div class="fx-orb fx-orb--b"></div>
+      <div class="fx-orb fx-orb--c"></div>
+      <div class="fx-veil"></div>
+    </div>
+    <canvas class="fx-stars" id="stars" aria-hidden="true"></canvas>
+
+    <header class="topbar" id="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="/hub" aria-label="Mallard Server Hub home">
+          <span class="brand-mark" aria-hidden="true"><i></i><img src="/logos/mallard.png" alt="" /></span>
+          <span class="brand-text"><strong>Mallard</strong><small>Server Hub</small></span>
+        </a>
+
+        <nav class="nav" id="nav" aria-label="Primary">
+          <ul class="nav-list">
+            {{range .Nav}}
+            {{if .Direct}}
+            <li class="nav-item">
+              <a class="nav-trigger nav-trigger--link{{if eq $.Page .Key}} is-active{{end}}" href="/{{.Key}}">{{.Label}}</a>
+            </li>
+            {{else}}
+            <li class="nav-item">
+              <button class="nav-trigger" type="button" aria-expanded="false">
+                <span>{{.Label}}</span>
+                <svg class="caret" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" /></svg>
+              </button>
+              <div class="nav-panel{{if gt (len .Items) 12}} nav-panel--wide{{end}}">
+                <p class="nav-panel-tag">{{.Tag}}</p>
+                <div class="nav-panel-grid">
+                  {{range .Items}}
+                  <a class="nav-link" href="{{.URL}}"{{if .NewTab}} target="_blank" rel="noopener noreferrer"{{end}}>
+                    <span class="nav-link-icon">
+                      {{if .Logo}}<img src="/logos/{{.Logo}}.png" alt="" loading="lazy" />{{else}}<span class="monogram">{{.Initials}}</span>{{end}}
+                    </span>
+                    <span class="nav-link-text"><strong>{{.Name}}</strong><small>{{.Desc}}</small></span>
+                  </a>
+                  {{end}}
+                </div>
+                <a class="nav-panel-all" href="/{{.Key}}">Open {{.Label}}<span aria-hidden="true">→</span></a>
+              </div>
+            </li>
+            {{end}}
+            {{end}}
+          </ul>
+        </nav>
+
+        <div class="topbar-meta">
+          <span class="status"><span class="dot" aria-hidden="true"></span>RACK ONLINE</span>
+          <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Toggle navigation">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">{{end}}
+
+{{define "foot"}}
+    </main>
+
+    <footer class="foot">
+      <div class="foot-inner">
+        <p><strong>Mallard Server Hub</strong> · node 192.168.1.121</p>
+        <p class="foot-links">
+          <a href="/hub">Hub</a><a href="/tools">Tools</a><a href="/database">Database</a><a href="/snippets">Snippets</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
+{{end}}
