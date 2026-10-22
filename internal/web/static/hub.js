@@ -16,6 +16,36 @@
     });
   });
 
+  // Dropdowns are anchored to their trigger, which pushes wide panels (Tools)
+  // past the right edge. Shift each panel just enough to stay inside the
+  // viewport, while keeping the open animation pointing at the trigger.
+  const positionPanel = (item) => {
+    const panel = item.querySelector(".nav-panel");
+    if (!panel) return;
+
+    if (window.matchMedia("(max-width: 1024px)").matches) {
+      panel.style.removeProperty("--nav-panel-left");
+      panel.style.removeProperty("--nav-panel-origin");
+      return;
+    }
+
+    const rect = item.getBoundingClientRect();
+    const width = panel.offsetWidth;
+    const viewport = document.documentElement.clientWidth;
+    const margin = 16;
+    const left = Math.max(margin, Math.min(rect.left, viewport - margin - width));
+
+    panel.style.setProperty("--nav-panel-left", `${Math.round(left - rect.left)}px`);
+    panel.style.setProperty(
+      "--nav-panel-origin",
+      `${Math.round(rect.left + rect.width / 2 - left)}px`
+    );
+  };
+
+  // Position closed panels too: their absolute box still counts towards the
+  // document's scroll width, which made every page horizontally scrollable.
+  items.forEach(positionPanel);
+
   const closeAll = (except) => {
     items.forEach((item) => {
       if (item === except) return;
@@ -36,11 +66,15 @@
 
     trigger.addEventListener("click", (event) => {
       event.preventDefault();
+      positionPanel(item);
       const open = item.dataset.open !== "true";
       closeAll(item);
       item.dataset.open = String(open);
       trigger.setAttribute("aria-expanded", String(open));
     });
+
+    item.addEventListener("pointerenter", () => positionPanel(item));
+    item.addEventListener("focusin", () => positionPanel(item));
 
     item.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
@@ -54,6 +88,18 @@
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".nav-item")) closeAll(null);
   });
+
+  // Trigger positions move on resize and after webfonts load.
+  let panelTimer = 0;
+  const reposition = () => {
+    clearTimeout(panelTimer);
+    panelTimer = window.setTimeout(() => items.forEach(positionPanel), 120);
+  };
+  window.addEventListener("resize", reposition);
+  window.addEventListener("load", reposition);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(reposition);
+  }
 
   /* ---------------- mobile menu ---------------- */
 
@@ -141,24 +187,47 @@
     colors: ["175, 5, 202", "4, 134, 192", "34, 211, 238", "255, 255, 255"],
   };
 
+  // Pre-render one glow sprite per color so the frame loop is a cheap
+  // drawImage per star instead of two gradient arcs.
+  const sprite = (color) => {
+    const s = document.createElement("canvas");
+    const size = 32;
+    s.width = s.height = size;
+    const c = s.getContext("2d");
+    const [r, g, b] = color.split(", ");
+    const grad = c.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, 1)`);
+    grad.addColorStop(0.28, `rgba(${r}, ${g}, ${b}, 0.5)`);
+    grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+    c.fillStyle = grad;
+    c.fillRect(0, 0, size, size);
+    return s;
+  };
+
+  let sprites = [];
+
   const resize = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
     width = canvas.clientWidth;
     height = canvas.clientHeight;
     canvas.width = Math.floor(width * dpr);
     canvas.height = Math.floor(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    config.count = Math.round(Math.min(140, Math.max(40, (width * height) / 16000)));
+    if (!sprites.length) {
+      sprites = config.colors.map(sprite);
+    }
+
+    config.count = Math.round(Math.min(90, Math.max(30, (width * height) / 24000)));
     stars = Array.from({ length: config.count }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      r: Math.random() * 1.5 + 0.35,
+      s: Math.random() * 5 + 2,
       vy: Math.random() * 0.35 + 0.06,
       drift: (Math.random() - 0.5) * 0.12,
       alpha: Math.random() * 0.5 + 0.12,
       twinkle: Math.random() * Math.PI * 2,
-      color: config.colors[Math.floor(Math.random() * config.colors.length)],
+      img: sprites[Math.floor(Math.random() * sprites.length)],
     }));
   };
 
@@ -178,24 +247,28 @@
       if (star.x > width + 4) star.x = -4;
 
       const alpha = star.alpha * (0.65 + 0.35 * Math.sin(star.twinkle));
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(${star.color}, ${alpha.toFixed(3)})`;
-      ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-      ctx.fill();
-
-      if (star.r > 1.2) {
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(${star.color}, ${(alpha * 0.12).toFixed(3)})`;
-        ctx.arc(star.x, star.y, star.r * 5, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      ctx.globalAlpha = alpha > 1 ? 1 : alpha;
+      ctx.drawImage(star.img, star.x - star.s / 2, star.y - star.s / 2, star.s, star.s);
     }
+    ctx.globalAlpha = 1;
 
     raf = requestAnimationFrame(draw);
   };
 
+  // Cap the field at ~30fps: it's ambient motion, not gameplay.
+  const WAIT = 1000 / 30;
+  let last = 0;
+  const tick = (t) => {
+    if (t - last >= WAIT) {
+      last = t;
+      draw();
+    } else {
+      raf = requestAnimationFrame(tick);
+    }
+  };
+
   resize();
-  draw();
+  tick(0);
 
   let resizeTimer = 0;
   window.addEventListener("resize", () => {
@@ -207,7 +280,8 @@
     if (document.hidden) {
       cancelAnimationFrame(raf);
     } else {
-      raf = requestAnimationFrame(draw);
+      last = 0;
+      raf = requestAnimationFrame(tick);
     }
   });
 })();

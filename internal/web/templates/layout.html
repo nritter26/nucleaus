@@ -6,13 +6,17 @@
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#07030d" />
     <title>{{.Title}} · Mallard</title>
+    <link rel="icon" type="image/x-icon" href="{{asset "/logos/favicon.ico"}}" />
+    <link rel="icon" type="image/png" sizes="32x32" href="{{asset "/logos/mallard.png"}}" />
+    <link rel="apple-touch-icon" href="{{asset "/logos/mallard.png"}}" />
     <script>
       document.documentElement.classList.add("js");
     </script>
-    <link rel="stylesheet" href="/static/hub.css" />
-    <script src="/static/htmx.min.js" defer></script>
-    <script src="/static/highlight.js" defer></script>
-    <script src="/static/hub.js" defer></script>
+    <link rel="stylesheet" href="{{asset "/static/hub.css"}}" />
+    {{if eq .Page "gitlab"}}<link rel="stylesheet" href="{{asset "/static/gitlab.css"}}" />{{end}}
+    <script src="{{asset "/static/htmx.min.js"}}" defer></script>
+    <script src="{{asset "/static/highlight.js"}}" defer></script>
+    <script src="{{asset "/static/hub.js"}}" defer></script>
   </head>
   <body data-page="{{.Page}}">
     <a class="skip" href="#main">Skip to content</a>
@@ -29,7 +33,7 @@
     <header class="topbar" id="topbar">
       <div class="topbar-inner">
         <a class="brand" href="/hub" aria-label="Mallard Server Hub home">
-          <span class="brand-mark" aria-hidden="true"><i></i><img src="/logos/mallard.png" alt="" /></span>
+          <span class="brand-mark" aria-hidden="true"><i></i><img src="{{asset "/logos/mallard.png"}}" alt="" /></span>
           <span class="brand-text"><strong>Mallard</strong><small>Server Hub</small></span>
         </a>
 
@@ -67,7 +71,11 @@
         </nav>
 
         <div class="topbar-meta">
-          <span class="status"><span class="dot" aria-hidden="true"></span>RACK ONLINE</span>
+          <a class="status status--link" href="https://192.168.1.121:9443/#!/3/docker/stacks/newstack" target="_blank" rel="noopener noreferrer" aria-label="Open Portainer">
+            <span class="dot" aria-hidden="true"></span>
+            <img class="status-logo" src="{{asset "/logos/portainer.png"}}" alt="" loading="lazy" />
+            PORTAINER<span class="arrow" aria-hidden="true">↗</span>
+          </a>
           <button class="nav-toggle" type="button" aria-expanded="false" aria-label="Toggle navigation">
             <span></span><span></span><span></span>
           </button>

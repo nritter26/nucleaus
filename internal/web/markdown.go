@@ -14,17 +14,17 @@ import (
 // actually appear there: headings, fenced code, bullet and ordered lists
 // (one level of nesting), pipe tables, blockquotes and plain paragraphs.
 
-type mdBlock struct {
+type MdBlock struct {
 	Kind  string // "p", "quote", "list", "olist", "table", "code", "head"
 	Text  string
 	Lang  string
 	Body  string
-	Items []mdItem
+	Items []MdItem
 	Rows  [][]string // table rows, cells held raw
 }
 
-// mdItem is one list entry with optional nested bullets.
-type mdItem struct {
+// MdItem is one list entry with optional nested bullets.
+type MdItem struct {
 	Text     string
 	Ordered  bool
 	Children []string
@@ -33,11 +33,14 @@ type mdItem struct {
 type mdSection struct {
 	ID      string
 	Heading string
+	Note    string // parenthetical heading annotation, e.g. "Stage 2, Topic 2.4"
 	Query   string
 	HTML    template.HTML
 	Count   int // copyable code blocks
+	Minutes int // rough reading time for prose plus code
+	Lesson  bool
 
-	Blocks []mdBlock
+	Blocks []MdBlock
 }
 
 type mdDoc struct {
@@ -50,17 +53,33 @@ var (
 	// Links are rewritten first so later passes can not touch their URLs.
 	docLink     = regexp.MustCompile(`\[([^\]]+)\]\(([^)\s]+)\)`)
 	docBoldSpan = regexp.MustCompile(`\*\*([^*]+)\*\*`)
+	docItalic   = regexp.MustCompile(`\*([^*\n]+)\*`)
 	docCodeSpan = regexp.MustCompile("`[^`\n]+`")
 
 	listItem = regexp.MustCompile(`^[-*+] +(.+)$`)
 	ordItem  = regexp.MustCompile(`^(\d+)[.)] +(.+)$`)
 	tableSep = regexp.MustCompile(`^:?-{3,}:?$`)
+
+	// Curriculum headings carry provenance in parentheses, e.g.
+	// "Lesson 4: Functions  *(Stage 2, Topic 2.3)*". Keep it as a badge
+	// instead of showing the markdown punctuation to the reader.
+	headingNote = regexp.MustCompile(`\s+\*\(([^)]+)\)\*\s*$`)
+	lessonHead  = regexp.MustCompile(`^Lesson \d+\b`)
 )
 
-// mdInlineHTML renders links, bold and code spans on top of an HTML-escaped
-// string so no raw markup can leak through from the doc files.
+// mdInlineHTML renders links, bold, italics and code spans on top of an
+// HTML-escaped string so no raw markup can leak through from the doc files.
 func mdInlineHTML(text string) template.HTML {
 	s := html.EscapeString(text)
+
+	// Code spans are swapped for placeholders first so later passes never
+	// rewrite their contents: `*int`, `a*b*c` and URLs stay literal.
+	var codes []string
+	s = docCodeSpan.ReplaceAllStringFunc(s, func(m string) string {
+		codes = append(codes, "<code>"+strings.Trim(m, "`")+"</code>")
+		return fmt.Sprintf("\x00%d\x00", len(codes)-1)
+	})
+
 	s = docLink.ReplaceAllStringFunc(s, func(m string) string {
 		parts := docLink.FindStringSubmatch(m)
 		// In-page anchors stay in the same tab.
@@ -70,9 +89,10 @@ func mdInlineHTML(text string) template.HTML {
 		return `<a href="` + parts[2] + `" target="_blank" rel="noopener noreferrer">` + parts[1] + `</a>`
 	})
 	s = docBoldSpan.ReplaceAllString(s, "<strong>$1</strong>")
-	s = docCodeSpan.ReplaceAllStringFunc(s, func(m string) string {
-		return "<code>" + strings.Trim(m, "`") + "</code>"
-	})
+	s = docItalic.ReplaceAllString(s, "<em>$1</em>")
+	for i, code := range codes {
+		s = strings.Replace(s, fmt.Sprintf("\x00%d\x00", i), code, 1)
+	}
 	return template.HTML(s)
 }
 
@@ -140,7 +160,7 @@ type mdParser struct {
 	doc   mdDoc
 	sec   *mdSection
 	para  []string
-	items []mdItem
+	items []MdItem
 	table [][]string
 	quote []string
 	fence bool
@@ -160,7 +180,7 @@ func parseMarkdown(content string) mdDoc {
 		if p.fence {
 			if strings.HasPrefix(trimmed, "```") {
 				p.fence = false
-				p.append(mdBlock{Kind: "code", Lang: p.lang, Body: strings.Trim(strings.Join(p.body, "\n"), "\n")})
+				p.append(MdBlock{Kind: "code", Lang: p.lang, Body: strings.Trim(strings.Join(p.body, "\n"), "\n")})
 				p.body, p.lang = nil, ""
 				continue
 			}
@@ -203,10 +223,10 @@ func parseMarkdown(content string) mdDoc {
 			}
 		case strings.HasPrefix(trimmed, "### "):
 			p.flush()
-			p.append(mdBlock{Kind: "head", Text: strings.TrimSpace(strings.TrimPrefix(trimmed, "### "))})
+			p.append(MdBlock{Kind: "head", Text: strings.TrimSpace(strings.TrimPrefix(trimmed, "### "))})
 		case strings.HasPrefix(trimmed, "#### "), strings.HasPrefix(trimmed, "##### "):
 			p.flush()
-			p.append(mdBlock{Kind: "head", Text: strings.TrimSpace(strings.TrimLeft(trimmed, "# "))})
+			p.append(MdBlock{Kind: "head", Text: strings.TrimSpace(strings.TrimLeft(trimmed, "# "))})
 		case strings.HasPrefix(trimmed, "> "):
 			p.flush()
 			p.quote = append(p.quote, strings.TrimSpace(strings.TrimPrefix(trimmed, "> ")))
@@ -214,12 +234,12 @@ func parseMarkdown(content string) mdDoc {
 			if len(p.items) == 0 {
 				p.flush()
 			}
-			p.items = append(p.items, mdItem{Text: listItem.FindStringSubmatch(trimmed)[1]})
+			p.items = append(p.items, MdItem{Text: listItem.FindStringSubmatch(trimmed)[1]})
 		case ordItem.MatchString(trimmed):
 			if len(p.items) == 0 {
 				p.flush()
 			}
-			p.items = append(p.items, mdItem{
+			p.items = append(p.items, MdItem{
 				Text:    ordItem.FindStringSubmatch(trimmed)[2],
 				Ordered: true,
 			})
@@ -249,22 +269,71 @@ func parseMarkdown(content string) mdDoc {
 				s.Count++
 			}
 		}
+		s.Minutes = readingMinutes(s.Blocks)
 		s.Query = sectionQuery(s.Heading, s.Blocks)
 		p.doc.Total += s.Count
 	}
 	return p.doc
 }
 
+// ParseDoc exposes the markdown parser to other packages (the snippet
+// dump/migration tool). Internal rendering keeps using parseMarkdown.
+func ParseDoc(content string) mdDoc {
+	return parseMarkdown(content)
+}
+
 // startSection opens a "## " heading. A table of contents is skipped, along
 // with everything under it, to keep pages lean.
 func (p *mdParser) startSection(heading string) {
+	note := ""
+	if m := headingNote.FindStringSubmatch(heading); m != nil {
+		note = strings.TrimSpace(m[1])
+		heading = strings.TrimSpace(heading[:len(heading)-len(m[0])])
+	}
 	switch strings.ToLower(heading) {
 	case "table of contents", "contents":
 		p.sec = nil
 		return
 	}
-	p.doc.Sections = append(p.doc.Sections, mdSection{Heading: heading})
+	p.doc.Sections = append(p.doc.Sections, mdSection{
+		Heading: heading,
+		Note:    note,
+		Lesson:  lessonHead.MatchString(heading),
+	})
 	p.sec = &p.doc.Sections[len(p.doc.Sections)-1]
+}
+
+// readingMinutes estimates reading time: prose at ~200 wpm and code at
+// ~120 wpm, since code is read more slowly than plain text.
+func readingMinutes(blocks []MdBlock) int {
+	prose, code := 0, 0
+	for _, b := range blocks {
+		switch b.Kind {
+		case "p", "quote", "head":
+			prose += len(strings.Fields(b.Text))
+		case "list", "olist":
+			for _, it := range b.Items {
+				prose += len(strings.Fields(it.Text))
+				for _, child := range it.Children {
+					prose += len(strings.Fields(child))
+				}
+			}
+		case "table":
+			for _, row := range b.Rows {
+				prose += len(strings.Fields(strings.Join(row, " ")))
+			}
+		case "code":
+			code += len(strings.Fields(b.Body))
+		}
+	}
+	if prose == 0 && code == 0 {
+		return 0
+	}
+	minutes := (prose+199)/200 + (code+119)/120
+	if minutes < 1 {
+		minutes = 1
+	}
+	return minutes
 }
 
 // flush commits any paragraph, list, table or quote being collected. It runs
@@ -272,15 +341,15 @@ func (p *mdParser) startSection(heading string) {
 // blocks in document order.
 func (p *mdParser) flush() {
 	if len(p.para) > 0 {
-		p.append(mdBlock{Kind: "p", Text: strings.Join(p.para, " ")})
+		p.append(MdBlock{Kind: "p", Text: strings.Join(p.para, " ")})
 		p.para = nil
 	}
 	if len(p.quote) > 0 {
-		p.append(mdBlock{Kind: "quote", Text: strings.Join(p.quote, " ")})
+		p.append(MdBlock{Kind: "quote", Text: strings.Join(p.quote, " ")})
 		p.quote = nil
 	}
 	if len(p.table) > 0 {
-		p.append(mdBlock{Kind: "table", Rows: p.table})
+		p.append(MdBlock{Kind: "table", Rows: p.table})
 		p.table = nil
 	}
 	if len(p.items) > 0 {
@@ -289,12 +358,12 @@ func (p *mdParser) flush() {
 		if ordered {
 			kind = "olist"
 		}
-		p.append(mdBlock{Kind: kind, Items: p.items})
+		p.append(MdBlock{Kind: kind, Items: p.items})
 		p.items = nil
 	}
 }
 
-func (p *mdParser) append(b mdBlock) {
+func (p *mdParser) append(b MdBlock) {
 	if p.sec == nil {
 		return
 	}
@@ -304,7 +373,7 @@ func (p *mdParser) append(b mdBlock) {
 const sectionQueryLimit = 600
 
 // sectionQuery builds a searchable haystack for one collapsible section.
-func sectionQuery(heading string, blocks []mdBlock) string {
+func sectionQuery(heading string, blocks []MdBlock) string {
 	var sb strings.Builder
 	sb.WriteString(heading)
 	sb.WriteByte(' ')
@@ -345,7 +414,7 @@ func sectionQuery(heading string, blocks []mdBlock) string {
 }
 
 // renderBlocks turns parsed blocks into section HTML.
-func renderBlocks(blocks []mdBlock) template.HTML {
+func renderBlocks(blocks []MdBlock) template.HTML {
 	var b strings.Builder
 	for _, bl := range blocks {
 		switch bl.Kind {
@@ -366,7 +435,7 @@ func renderBlocks(blocks []mdBlock) template.HTML {
 	return template.HTML(b.String())
 }
 
-func renderList(bl mdBlock) string {
+func renderList(bl MdBlock) string {
 	tag := "ul"
 	if bl.Kind == "olist" {
 		tag = "ol"
@@ -433,7 +502,7 @@ func renderTable(rows [][]string) string {
 	return b.String()
 }
 
-func renderCode(bl mdBlock) string {
+func renderCode(bl MdBlock) string {
 	var b strings.Builder
 	b.WriteString(`<figure class="cheat-cmd doc-code"`)
 	if bl.Lang != "" {

@@ -126,4 +126,100 @@
       }, 1400);
     });
   });
+
+  // Curriculum progress: lessons are marked complete in localStorage so a
+  // learner can leave and resume without an account. Anything stored by an
+  // older build (or corrupted JSON) falls back to an empty set.
+  const progress = document.querySelector(".doc-progress");
+  if (progress) {
+    const key = `mallard:progress:${progress.dataset.progress}`;
+    const lessons = sections.filter((sec) => sec.dataset.lesson === "1");
+    const doneEl = document.getElementById("doc-progress-done");
+    const barEl = document.getElementById("doc-progress-bar");
+    const trackEl = document.getElementById("doc-progress-track");
+    const nextEl = document.getElementById("doc-progress-next");
+    const resetEl = document.getElementById("doc-progress-reset");
+
+    const read = () => {
+      try {
+        const value = JSON.parse(localStorage.getItem(key) || "[]");
+        return new Set(Array.isArray(value) ? value : []);
+      } catch (err) {
+        return new Set();
+      }
+    };
+
+    let done = read();
+
+    const write = () => {
+      try {
+        localStorage.setItem(key, JSON.stringify([...done]));
+      } catch (err) {
+        /* storage disabled: progress still works for this page view */
+      }
+    };
+
+    const syncProgress = () => {
+      let count = 0;
+      lessons.forEach((sec) => {
+        const complete = done.has(sec.id);
+        sec.classList.toggle("is-done", complete);
+
+        const button = sec.querySelector(".doc-done");
+        if (button) {
+          button.setAttribute("aria-pressed", complete ? "true" : "false");
+          const label = button.querySelector(".doc-done-label");
+          if (label) {
+            label.textContent = complete ? "Lesson complete" : "Mark lesson complete";
+          }
+        }
+
+        if (complete) count += 1;
+      });
+
+      if (doneEl) doneEl.textContent = String(count);
+      if (barEl) {
+        barEl.style.width = `${lessons.length ? Math.round((count / lessons.length) * 100) : 0}%`;
+      }
+      if (trackEl) trackEl.setAttribute("aria-valuenow", String(count));
+
+      const next = lessons.find((sec) => !done.has(sec.id));
+      if (nextEl) {
+        nextEl.hidden = !next;
+        if (next) {
+          const name = next.querySelector(".doc-sec-name")?.textContent?.trim() || "the next lesson";
+          nextEl.href = `#${next.id}`;
+          nextEl.textContent = count === 0 ? "Start the course →" : "Continue →";
+          nextEl.title = name;
+        }
+      }
+    };
+
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest(".doc-done");
+      if (!button) return;
+
+      const sec = button.closest(".doc-sec");
+      if (!sec) return;
+
+      if (done.has(sec.id)) {
+        done.delete(sec.id);
+      } else {
+        done.add(sec.id);
+      }
+      write();
+      syncProgress();
+    });
+
+    if (resetEl) {
+      resetEl.addEventListener("click", () => {
+        if (!window.confirm("Reset all lesson progress for this curriculum?")) return;
+        done = new Set();
+        write();
+        syncProgress();
+      });
+    }
+
+    syncProgress();
+  }
 })();

@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -44,14 +45,15 @@ var (
 )
 
 var docLabels = map[string]string{
-	"bash-commands-for-backend-dev-and-devops":          "Bash",
-	"docker-commands-for-backend-devops":                "Docker",
-	"golang-backend-commands":                           "Go CLI",
-	"golang-backend-helper-functions":                   "Go Helpers",
-	"golang-backend-utility-functions":                  "Go Utilities",
-	"golang-backend-utility-structs":                    "Go Structs",
-	"golang-utility-interfaces-for-backend-development": "Go Interfaces",
-	"postgresql-commands-for-backend-devops":            "Postgres",
+	"git-command-reference-cheat-sheet":                    "Git",
+	"bash-commands-for-backend-dev-and-devops":             "Bash",
+	"docker-commands-for-backend-devops":                   "Docker",
+	"golang-backend-commands":                              "Go CLI",
+	"golang-backend-helper-functions":                      "Go Helpers",
+	"golang-backend-utility-functions":                     "Go Utilities",
+	"golang-backend-utility-structs":                       "Go Structs",
+	"golang-utility-interfaces-for-backend-development":    "Go Interfaces",
+	"postgresql-commands-for-backend-devops":               "Postgres",
 	"postgresql-tables-and-constraints-for-backend-devops": "PG Schema",
 	"rust-backend-commands":                                "Rust",
 	"typescript-backend-commands":                          "TypeScript",
@@ -61,6 +63,11 @@ var docLabels = map[string]string{
 	"golang-backend-api-scaffolds":                         "API Scaffolds",
 	"go-fintech-api-scaffolds":                             "Fintech APIs",
 	"golang-roadmap":                                       "Go Roadmap",
+	"golang-nested-functions":                              "Go Nested",
+	"rust-nested-functions":                                "Rust Nested",
+	"docker-nested-functions":                              "Docker Nested",
+	"typescript-nested-functions":                          "TS Nested",
+	"bash-nested-functions":                                "Bash Nested",
 }
 
 var docOrder = []string{
@@ -78,6 +85,11 @@ var docOrder = []string{
 	"golang-backend-utility-functions",
 	"golang-backend-utility-structs",
 	"golang-utility-interfaces-for-backend-development",
+	"golang-nested-functions",
+	"typescript-nested-functions",
+	"rust-nested-functions",
+	"bash-nested-functions",
+	"docker-nested-functions",
 }
 
 // commandsDir resolves where the cheat sheet markdown lives.
@@ -114,27 +126,19 @@ func loadCommands(dir string) ([]cheatDoc, error) {
 }
 
 func parseCommands(dir string) ([]cheatDoc, error) {
-	entries, err := os.ReadDir(dir)
+	files, err := collectCheatFiles(dir)
 	if err != nil {
 		return nil, fmt.Errorf("read commands dir: %w", err)
-	}
-
-	files := make([]string, 0, len(entries))
-	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
-			continue
-		}
-		files = append(files, entry.Name())
 	}
 	sort.Strings(files)
 
 	docs := make([]cheatDoc, 0, len(files))
 	for _, name := range files {
-		raw, err := os.ReadFile(filepath.Join(dir, name))
+		raw, err := os.ReadFile(name)
 		if err != nil {
 			continue
 		}
-		doc := parseDoc(name, string(raw))
+		doc := parseDoc(filepath.Base(name), string(raw))
 		if doc.Count > 0 {
 			docs = append(docs, doc)
 		}
@@ -156,6 +160,51 @@ func parseCommands(dir string) ([]cheatDoc, error) {
 		return ri < rj
 	})
 	return docs, nil
+}
+
+// collectCheatFiles walks the command reference root recursively (archived
+// markdown may live in nested folders such as backup/) and adds the archived
+// reference shelves kept beside the snippet vault, de-duplicated by filename.
+func collectCheatFiles(dir string) ([]string, error) {
+	var files []string
+	seen := map[string]bool{}
+	collect := func(root string) error {
+		if info, err := os.Stat(root); err != nil || !info.IsDir() {
+			return nil
+		}
+		return filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() || !strings.HasSuffix(d.Name(), ".md") {
+				return nil
+			}
+			if seen[d.Name()] {
+				return nil
+			}
+			seen[d.Name()] = true
+			files = append(files, path)
+			return nil
+		})
+	}
+	if err := collect(dir); err != nil {
+		return nil, err
+	}
+	for _, extra := range cheatExtraDirs() {
+		if err := collect(extra); err != nil {
+			return nil, err
+		}
+	}
+	return files, nil
+}
+
+// cheatExtraDirs lists supplementary reference dirs: archived reference
+// markdown kept alongside the snippet vault, override via CHEATSHEET_EXTRA_DIR.
+func cheatExtraDirs() []string {
+	if dir := os.Getenv("CHEATSHEET_EXTRA_DIR"); dir != "" {
+		return []string{dir}
+	}
+	return []string{filepath.Join(snippetsRoot(), "backup")}
 }
 
 func docSlug(filename string) string {
@@ -184,6 +233,7 @@ func parseDoc(filename, content string) cheatDoc {
 	var draft *draftEntry
 	var inFence bool
 	skipSection := false
+	sectionLines := [][]string{}
 
 	flush := func() {
 		if draft == nil {
@@ -202,9 +252,13 @@ func parseDoc(filename, content string) cheatDoc {
 		line := strings.TrimRight(raw, " \t\r")
 		trimmed := strings.TrimSpace(line)
 
+		if section != nil && !skipSection {
+			sectionLines[len(sectionLines)-1] = append(sectionLines[len(sectionLines)-1], line)
+		}
+
 		if strings.HasPrefix(trimmed, "```") {
+			inFence = !inFence
 			if draft != nil {
-				inFence = !inFence
 				draft.lines = append(draft.lines, line)
 			}
 			continue
@@ -217,7 +271,7 @@ func parseDoc(filename, content string) cheatDoc {
 		}
 
 		switch {
-		case strings.HasPrefix(trimmed, "# "):
+		case !inFence && strings.HasPrefix(trimmed, "# "):
 			flush()
 			section = nil
 			if doc.Title == "" {
@@ -237,6 +291,7 @@ func parseDoc(filename, content string) cheatDoc {
 			skipSection = false
 			doc.Sections = append(doc.Sections, cheatSection{Title: title})
 			section = &doc.Sections[len(doc.Sections)-1]
+			sectionLines = append(sectionLines, []string{})
 		case strings.HasPrefix(trimmed, "### "):
 			flush()
 			if section == nil || skipSection {
@@ -263,7 +318,100 @@ func parseDoc(filename, content string) cheatDoc {
 	}
 	flush()
 
+	flush()
+
+	// Sections that hold nothing but annotated fences (comment lines inside a
+	// fenced block, one command per comment) fall back to a comment-driven
+	// split, like the Git command reference.
+	for i := range doc.Sections {
+		sec := &doc.Sections[i]
+		if len(sec.Entries) > 0 {
+			continue
+		}
+		if i < len(sectionLines) {
+			for _, entry := range commentedFenceEntries(sectionLines[i]) {
+				sec.Entries = append(sec.Entries, entry)
+				doc.Count++
+			}
+		}
+	}
+
 	return doc
+}
+
+// commentedFenceEntries splits fenced blocks whose lines carry "# comment" +
+// command pairs into individual entries.
+func commentedFenceEntries(lines []string) []cheatEntry {
+	var out []cheatEntry
+	var draft *draftEntry
+	inFence := false
+
+	flush := func(command string) {
+		if draft == nil {
+			return
+		}
+		cmd := strings.TrimSpace(strings.Join(append(draft.lines, command), "\n"))
+		if cmd != "" && draft.title != "" {
+			out = append(out, cheatEntry{Title: draft.title, Command: strings.Trim(cmd, "\n")})
+		}
+		draft = nil
+	}
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "```") {
+			flush("")
+			inFence = !inFence
+			continue
+		}
+		if !inFence {
+			continue
+		}
+		if title, ok := fenceCommentTitle(line); ok {
+			flush("")
+			if title != "" {
+				draft = &draftEntry{title: title, lines: []string{}}
+			}
+			continue
+		}
+		if trimmed == "" {
+			continue
+		}
+		if draft == nil {
+			draft = &draftEntry{title: "", lines: []string{}}
+		}
+		draft.lines = append(draft.lines, line)
+	}
+	flush("")
+	return out
+}
+
+// fenceCommentTitle recognises the comment styles used to annotate fenced
+// cheat sheet entries: "# description" (Git reference) and
+// "// 1. description" (TypeScript helper shelves). The bool reports whether the
+// line is a comment at all; an empty title marks a bare separator comment.
+func fenceCommentTitle(line string) (string, bool) {
+	// Indented comments annotate the code inside an entry; only column-zero
+	// comments introduce a new one.
+	if line != strings.TrimLeft(line, " \t") {
+		return "", false
+	}
+	var body string
+	switch {
+	case strings.HasPrefix(line, "//"):
+		body = strings.TrimSpace(strings.TrimPrefix(line, "//"))
+	case strings.HasPrefix(line, "# "):
+		body = strings.TrimSpace(strings.TrimPrefix(line, "# "))
+	default:
+		return "", false
+	}
+	if m := numberedHead.FindStringSubmatch(body); m != nil {
+		body = strings.TrimSpace(m[1])
+	}
+	if strings.Trim(body, "-=_* #") == "" {
+		return "", true
+	}
+	return body, true
 }
 
 func buildEntry(d draftEntry) (cheatEntry, bool) {

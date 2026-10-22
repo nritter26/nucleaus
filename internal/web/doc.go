@@ -17,10 +17,17 @@ import (
 type docSectionView struct {
 	ID      string
 	Heading string
+	Note    string
 	Query   string
 	Open    bool
 	Count   int
+	Minutes int
+	Lesson  bool
 	Body    template.HTML
+
+	// Snippet rows from the database carry an edit/delete affordance.
+	SnippetID int64
+	Editable  bool
 }
 
 type docGroupView struct {
@@ -39,13 +46,16 @@ type docResource struct {
 }
 
 type docView struct {
-	Slug  string
-	Label string
-	Desc  string
-	Logo  string
-	Count int
-	Tabs  []docGroupView // one group per source file
-	Error string         // loader failure, rendered as an error panel
+	Slug    string
+	Label   string
+	Desc    string
+	Logo    string
+	Kind    string // "curriculum" or "snippets"
+	Count   int
+	Lessons int
+	Minutes int
+	Tabs    []docGroupView // one group per source file
+	Error   string         // loader failure, rendered as an error panel
 
 	// Curated pointers to official documentation and video courses.
 	Resources []docResource
@@ -105,8 +115,11 @@ func sectionsFromDoc(doc mdDoc) []docSectionView {
 		out = append(out, docSectionView{
 			ID:      uniqueSlug(slugify(sec.Heading), seen),
 			Heading: sec.Heading,
+			Note:    sec.Note,
 			Query:   sec.Query,
 			Count:   sec.Count,
+			Minutes: sec.Minutes,
+			Lesson:  sec.Lesson,
 			Body:    sec.HTML,
 			Open:    i == 0,
 		})

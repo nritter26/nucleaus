@@ -1,8 +1,12 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
+	"sort"
 	"strings"
+
+	"nucleaus/internal/snippets"
 )
 
 // link is one clickable destination rendered as a card or a dropdown entry.
@@ -43,6 +47,13 @@ type pageData struct {
 
 	// Markdown doc pages (curriculum, snippets).
 	Doc *docView
+
+	// Snippet database views: labels, snippet CRUD, manage list.
+	HasDB     bool
+	Labels    []snippets.Label
+	Snip      *snippets.Snippet
+	SnipRows  []snipRow
+	SnipError string
 
 	// Cheat sheet page.
 	CheatDocs  []cheatDoc
@@ -96,6 +107,15 @@ func groups() []group {
 				view("Postgres", "Queries, schema design, and production reliability.", "/curriculum/postgres", "postgres"),
 				view("Docker", "Images, networks, and compose in production.", "/curriculum/docker", "docker"),
 				view("Rust", "Ownership, traits, and fearless systems code.", "/curriculum/rust", "rust"),
+				view("Git", "Version control mastery from basics to team flow.", "/curriculum/git", "git"),
+				view("Git Lab", "Repair broken repos in an animated commit simulator.", "/git-lab", "git"),
+				view("Gin", "The Go web framework in production.", "/curriculum/gin", "gin"),
+				view("Chi", "Lightweight, composable HTTP routers.", "/curriculum/chi", "chi"),
+				view("Hono", "The ultrafast JavaScript web framework.", "/curriculum/hono", "hono"),
+				view("Echo", "High performance, extensible Go web framework.", "/curriculum/echo", "echo"),
+				view("Fiber", "Express-inspired Go web framework.", "/curriculum/fiber", "fiber"),
+				view("Vue", "Vue 3 with TypeScript front-end architecture.", "/curriculum/vue", "vue"),
+				view("Redis", "Redis with Go: caching, streaming, and queues.", "/curriculum/redis", "redis"),
 				view("Browse curriculum", "All available learning tracks.", "/curriculum", ""),
 			},
 		},
@@ -103,15 +123,12 @@ func groups() []group {
 			Key:   "library",
 			Label: "Library",
 			Tag:   "02 / READ",
-			Blurb: "Reference material and deep dives kept beside the code.",
+			Blurb: "Reference shelves curated per language.",
 			Items: []link{
-				view("Golang", "Language reference and standard library notes.", "/library/golang", "golang"),
-				view("TypeScript", "Type system reference and runtime notes.", "/library/typescript", "ts"),
-				app("Cobra", "CLI framework — commands, flags, and docs.", "http://192.168.1.121:3001/mallard/cobra", "", "GITEA"),
-				app("Zerolog", "Structured, zero-allocation logging.", "http://192.168.1.121:3001/mallard/zerolog", "", "GITEA"),
-				app("Viper", "Configuration and environment binding.", "http://192.168.1.121:3001/mallard/viper", "", "GITEA"),
-				app("Awesome Go", "Curated list of Go libraries and tools.", "http://192.168.1.121:3001/mallard/awesome-go", "", "GITEA"),
-				app("Microservice-Kit", "Shared service scaffolding and helpers.", "http://192.168.1.121:3001/mallard/kit", "", "GITEA"),
+				view("Golang", "Engineering starters, mirrors, and fintech repos.", "/library/golang", "golang"),
+				view("TypeScript", "Typed API layers and edge-first routing.", "/library/typescript", "ts"),
+				view("Bash", "Script tooling, CLIs, and test harnesses.", "/library/bash", "bash"),
+				view("Rust", "Bindings, blockchain stacks, and wallet crypto.", "/library/rust", "rust"),
 				view("Browse library", "Every shelf in the archive.", "/library", ""),
 			},
 		},
@@ -153,7 +170,14 @@ func groups() []group {
 				app("Jaeger", "Distributed trace explorer.", "http://192.168.1.121:16686/search", "jaeger", "LAN :16686"),
 				app("TailScale", "Mesh VPN machine roster.", "https://console.tailscale.com/admin/machines", "tailscale-light", "PUBLIC"),
 				app("Swagger", "OpenAPI docs for the services.", "http://192.168.1.121:8082/", "swagger", "LAN :8082"),
-				app("K8S", "Cluster overview placeholder.", "/k8s", "k8s", "INTERNAL"),
+				app("K8S", "Cluster overview dashboard.", k8sURL, "k8s", "LAN :3999"),
+				app("DeepSeek", "Reasoning chat and code assistant.", "https://chat.deepseek.com/", "deepseek", "PUBLIC"),
+				app("Grok", "xAI chat assistant.", "https://grok.com/", "grok", "PUBLIC"),
+				app("Gemini", "Google AI assistant.", "https://gemini.google.com/app", "google-gemini", "PUBLIC"),
+				app("Claude", "Anthropic AI assistant.", "https://claude.ai/new", "claude", "PUBLIC"),
+				app("GLM", "Z.ai GLM chat assistant.", "https://chat.z.ai/", "glm", "PUBLIC"),
+				app("Gmail", "Mallard inbox.", "https://mail.google.com/mail/u/1/#inbox", "gmail", "PUBLIC"),
+				app("DrawDB", "Database diagram editor.", "https://www.drawdb.app/editor", "drawdb", "PUBLIC"),
 			},
 		},
 		{
@@ -194,7 +218,8 @@ func groups() []group {
 	}
 }
 
-// nav returns the navbar entries. Social has no destinations yet and is hidden.
+// nav returns the navbar entries sorted alphabetically, tags renumbered in
+// the new order. Social has no destinations yet and is hidden.
 func nav() []group {
 	all := groups()
 	out := make([]group, 0, len(all)+1)
@@ -204,13 +229,23 @@ func nav() []group {
 		}
 		out = append(out, g)
 	}
-	return append(out, group{
+	out = append(out, group{
 		Key:    "cheatsheet",
 		Label:  "Cheat Sheet",
-		Tag:    "08 / REFERENCE",
+		Tag:    "99 / REFERENCE",
 		Blurb:  "Every command from the reference library, one search away.",
 		Direct: true,
 	})
+	sort.Slice(out, func(i, j int) bool { return out[i].Key < out[j].Key })
+	for i := range out {
+		parts := strings.SplitN(out[i].Tag, " / ", 2)
+		suffix := out[i].Tag
+		if len(parts) == 2 {
+			suffix = parts[1]
+		}
+		out[i].Tag = fmt.Sprintf("%02d / %s", i+1, suffix)
+	}
+	return out
 }
 
 func findGroup(key string) (group, bool) {
@@ -243,6 +278,7 @@ func notFound(w http.ResponseWriter) {
 
 func registerPages(mux *http.ServeMux) {
 	mux.HandleFunc("GET /cheatsheet", handleCheatSheet)
+	mux.HandleFunc("GET /git-lab", handleGitLab)
 
 	mux.HandleFunc("GET /hub", func(w http.ResponseWriter, r *http.Request) {
 		Render(w, "hub_page", pageData{
@@ -270,21 +306,21 @@ func registerPages(mux *http.ServeMux) {
 		})
 	}
 
-	// Library tracks are placeholders until their docs land.
-	for _, key := range []string{"library"} {
-		registerPendingTrack(mux, key)
-	}
+	// Library: language picker first, then per-language shelves.
+	mux.HandleFunc("GET /library", handleLibrary)
+	mux.HandleFunc("GET /library/{slug}", handleLibraryShelf)
 
-	// Curriculum and snippets render full markdown docs when they exist.
+	// Curriculum renders markdown docs when they exist.
 	registerDocPages(mux, "curriculum", handleCurriculumDoc)
-	registerDocPages(mux, "snippets", handleSnippetDoc)
+
+	// Snippets: SQLite-backed vault with add/edit/delete plus labels.
+	registerSnippets(mux)
 
 	// TTS read-aloud player plus disk-backed generated audio.
 	mux.HandleFunc("GET /tts", handleTTS)
 	mux.HandleFunc("GET /tts/full/{slug}/{file}", handleTTSAudio)
 
 	for path, title := range map[string]string{
-		"/k8s":       "Kubernetes",
 		"/imagegen":  "Image-Gen",
 		"/bgremover": "BG-Remover",
 		"/mcp":       "MCP",
@@ -304,6 +340,11 @@ func registerPages(mux *http.ServeMux) {
 			})
 		})
 	}
+
+	// The Kubernetes surface lives outside the hub; forward visitors to it.
+	mux.HandleFunc("GET /k8s", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, k8sURL, http.StatusTemporaryRedirect)
+	})
 }
 
 // registerDocTitles mounts the tile catalog at /<key> and hands
@@ -334,21 +375,5 @@ func registerDocPages(mux *http.ServeMux, key string, doc http.HandlerFunc) {
 	mux.HandleFunc("GET /"+key+"/{slug}", doc)
 }
 
-// registerPendingTrack keeps a tab whose docs have not landed: a tile catalog
-// plus "module pending" detail pages.
-func registerPendingTrack(mux *http.ServeMux, key string) {
-	registerDocPages(mux, key, func(w http.ResponseWriter, r *http.Request) {
-		g, ok := findGroup(key)
-		if !ok {
-			notFound(w)
-			return
-		}
-		item, ok := findLink(g, r.URL.Path)
-		if !ok {
-			notFound(w)
-			return
-		}
-		item.Meta = "PENDING"
-		renderSoon(w, g, item, g.Label)
-	})
-}
+// k8sURL is where the Kubernetes surface lives on the rack.
+const k8sURL = "http://192.168.1.121:3999/"

@@ -9,8 +9,8 @@ import (
 )
 
 type User struct {
-	ID    int
-	Name  string
+	ID   int
+	Name string
 }
 
 type handler struct{ pool *pgxpool.Pool }

@@ -21,82 +21,82 @@
     },
     {
      "n": 4,
-     "title": "Lesson 1: Go Philosophy and Setup  *(go.json: Stage 1, Topics 1.1-1.3)*",
+     "title": "Lesson 1: Go Philosophy and Setup",
      "file": "go/004-lesson-1-go-philosophy-and-setup-gojson-st-88a6f8.mp3"
     },
     {
      "n": 5,
-     "title": "Lesson 2: Variables, Types, and Constants  *(go.json: Stage 2, Topics 2.1-2.5)*",
+     "title": "Lesson 2: Variables, Types, and Constants",
      "file": "go/005-lesson-2-variables-types-and-constants-goj-acd813.mp3"
     },
     {
      "n": 6,
-     "title": "Lesson 3: Control Flow  *(go.json: Stage 2, Topics 2.2)*",
+     "title": "Lesson 3: Control Flow",
      "file": "go/006-lesson-3-control-flow-gojson-stage-2-topic-391d3d.mp3"
     },
     {
      "n": 7,
-     "title": "Lesson 4: Functions  *(go.json: Stage 2, Topic 2.3)*",
+     "title": "Lesson 4: Functions",
      "file": "go/007-lesson-4-functions-gojson-stage-2-topic-23-e80c92.mp3"
     },
     {
      "n": 8,
-     "title": "Lesson 5: Core Data Structures  *(go.json: Stage 2, Topics 2.4-2.5)*",
+     "title": "Lesson 5: Core Data Structures",
      "file": "go/008-lesson-5-core-data-structures-gojson-stage-44bd4f.mp3"
     },
     {
      "n": 9,
-     "title": "Lesson 6: Methods, Interfaces, and Composition  *(go.json: Stage 3, Topics 3.1-3.2)*",
+     "title": "Lesson 6: Methods, Interfaces, and Composition",
      "file": "go/009-lesson-6-methods-interfaces-and-compositio-017d88.mp3"
     },
     {
      "n": 10,
-     "title": "Lesson 7: Error Handling  *(go.json: Stage 3, Topic 3.4)*",
+     "title": "Lesson 7: Error Handling",
      "file": "go/010-lesson-7-error-handling-gojson-stage-3-top-95c0e0.mp3"
     },
     {
      "n": 11,
-     "title": "Lesson 8: Packages, Modules, and Organization  *(go.json: Stage 4, Topics 4.1-4.4)*",
+     "title": "Lesson 8: Packages, Modules, and Organization",
      "file": "go/011-lesson-8-packages-modules-and-organization-56d394.mp3"
     },
     {
      "n": 12,
-     "title": "Optional Deep Dive: Generics  *(go.json: Stage 3, Topic 3.3; study after the backend path)*",
+     "title": "Optional Deep Dive: Generics",
      "file": "go/012-optional-deep-dive-generics-gojson-stage-3-844f1f.mp3"
     },
     {
      "n": 13,
-     "title": "Lesson 10: Testing  *(go.json: Stage 8, Topics 8.1-8.5)*",
+     "title": "Lesson 10: Testing",
      "file": "go/013-lesson-10-testing-gojson-stage-8-topics-81-963385.mp3"
     },
     {
      "n": 14,
-     "title": "Lesson 11: Files and I/O  *(go.json: Stage 7, Topics 7.1-7.4)*",
+     "title": "Lesson 11: Files and I/O",
      "file": "go/014-lesson-11-files-and-io-gojson-stage-7-topi-075118.mp3"
     },
     {
      "n": 15,
-     "title": "Lesson 12: HTTP Servers  *(go.json: Stage 9, Topics 9.1-9.4)*",
+     "title": "Lesson 12: HTTP Servers",
      "file": "go/015-lesson-12-http-servers-gojson-stage-9-topi-ec7225.mp3"
     },
     {
      "n": 16,
-     "title": "Lesson 13: SQL and PostgreSQL  *(go.json: Stage 10, Topics 10.1-10.5)*",
+     "title": "Lesson 13: SQL and PostgreSQL",
      "file": "go/016-lesson-13-sql-and-postgresql-gojson-stage--c0043f.mp3"
     },
     {
      "n": 17,
-     "title": "Lesson 14: API Design and Authentication  *(go.json: Stage 11, Topics 11.1-11.4)*",
+     "title": "Lesson 14: API Design and Authentication",
      "file": "go/017-lesson-14-api-design-and-authentication-go-646749.mp3"
     },
     {
      "n": 18,
-     "title": "Lesson 15: Concurrency Projects  *(go.json: Stage 6, Milestone 2)*",
+     "title": "Lesson 15: Concurrency Projects",
      "file": "go/018-lesson-15-concurrency-projects-gojson-stag-2a5b84.mp3"
     },
     {
      "n": 19,
-     "title": "Lesson 16: Final Project - Complete Go Service  *(go.json: Stages 9-14)*",
+     "title": "Lesson 16: Final Project - Complete Go Service",
      "file": "go/019-lesson-16-final-project---complete-go-serv-1da115.mp3"
     },
     {
@@ -126,72 +126,72 @@
     },
     {
      "n": 3,
-     "title": "Lesson 1: Introduction & Prerequisites *(core, ~2-4 days)*",
+     "title": "Lesson 1: Introduction & Prerequisites",
      "file": "typescript/003-lesson-1-introduction-prerequisites-core-2-07848b.mp3"
     },
     {
      "n": 4,
-     "title": "Lesson 2: Basic Types & Annotations *(core, ~1 week)*",
+     "title": "Lesson 2: Basic Types & Annotations",
      "file": "typescript/004-lesson-2-basic-types-annotations-core-1-we-d6a822.mp3"
     },
     {
      "n": 5,
-     "title": "Lesson 3: Functions in TypeScript *(core, ~1 week)*",
+     "title": "Lesson 3: Functions in TypeScript",
      "file": "typescript/005-lesson-3-functions-in-typescript-core-1-we-a74179.mp3"
     },
     {
      "n": 6,
-     "title": "Lesson 4: Custom Types & Type Definition *(core, ~1-2 weeks)*",
+     "title": "Lesson 4: Custom Types & Type Definition",
      "file": "typescript/006-lesson-4-custom-types-type-definition-core-29444c.mp3"
     },
     {
      "n": 7,
-     "title": "Lesson 5: Narrowing & Control Flow *(core, ~1 week)*",
+     "title": "Lesson 5: Narrowing & Control Flow",
      "file": "typescript/007-lesson-5-narrowing-control-flow-core-1-wee-e8fbdb.mp3"
     },
     {
      "n": 8,
-     "title": "Lesson 6: Generics *(core, ~1-2 weeks)*",
+     "title": "Lesson 6: Generics",
      "file": "typescript/008-lesson-6-generics-core-1-2-weeks-dc22cb.mp3"
     },
     {
      "n": 9,
-     "title": "Lesson 7: Built-in Utility Types *(core, ~1 week)*",
+     "title": "Lesson 7: Built-in Utility Types",
      "file": "typescript/009-lesson-7-built-in-utility-types-core-1-wee-def41d.mp3"
     },
     {
      "n": 10,
-     "title": "Lesson 8: Type Operators & Indexed Access *(important, ~3-5 days)*",
+     "title": "Lesson 8: Type Operators & Indexed Access",
      "file": "typescript/010-lesson-8-type-operators-indexed-access-imp-fa61c4.mp3"
     },
     {
      "n": 11,
-     "title": "Lesson 9: Advanced Type Manipulation *(important, ~2-3 weeks)*",
+     "title": "Lesson 9: Advanced Type Manipulation",
      "file": "typescript/011-lesson-9-advanced-type-manipulation-import-eac2b5.mp3"
     },
     {
      "n": 12,
-     "title": "Lesson 10: Object-Oriented TypeScript *(optional, ~1 week)*",
+     "title": "Lesson 10: Object-Oriented TypeScript",
      "file": "typescript/012-lesson-10-object-oriented-typescript-optio-ad666c.mp3"
     },
     {
      "n": 13,
-     "title": "Lesson 11: TypeScript Configuration (`tsconfig.json`) *(important, ~3-5 days)*",
+     "title": "Lesson 11: TypeScript Configuration (`tsconfig.json`)",
      "file": "typescript/013-lesson-11-typescript-configuration-tsconfi-c62b7d.mp3"
     },
     {
      "n": 14,
-     "title": "Lesson 12: Modules & Type Definitions *(important, ~1 week)*",
+     "title": "Lesson 12: Modules & Type Definitions",
      "file": "typescript/014-lesson-12-modules-type-definitions-importa-1f3265.mp3"
     },
     {
      "n": 15,
-     "title": "Lesson 13: Tooling & Quality *(important, ~1 week)*",
+     "title": "Lesson 13: Tooling & Quality",
      "file": "typescript/015-lesson-13-tooling-quality-important-1-week-ebf1c3.mp3"
     },
     {
      "n": 16,
-     "title": "Lesson 14: Frameworks & Real-World Projects *(important, ~2-4 weeks)*",
+     "title": "Lesson 14: Frameworks & Real-World Projects",
      "file": "typescript/016-lesson-14-frameworks-real-world-projects-i-be8445.mp3"
     },
     {

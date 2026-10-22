@@ -1,36 +1,62 @@
-services:
-  db:
-    image: postgres:17-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-nucleaus}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nucleaus}
-      POSTGRES_DB: ${POSTGRES_DB:-nucleaus}
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nucleaus} -d ${POSTGRES_DB:-nucleaus}"]
-      interval: 5s
-      timeout: 3s
-      retries: 12
+name: nucleaus
 
+services:
   hub:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: nucleaus-hub
+    container_name: nucleaus-hub
     restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
       PORT: ${PORT:-9088}
-      DATABASE_URL: postgres://${POSTGRES_USER:-nucleaus}:${POSTGRES_PASSWORD:-nucleaus}@db:5432/${POSTGRES_DB:-nucleaus}?sslmode=disable
+      PROMETHEUS_URL: http://prometheus:9090
+      SNIPPETS_DB: /data/nucleaus.db
+    volumes:
+      - hub-data:/data
     ports:
       - "${PORT:-9088}:${PORT:-9088}"
+    networks:
+      - nucleus
+      - monitoring
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:${PORT:-9088}/healthz || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:$${PORT:-9088}/healthz || exit 1",
+        ]
       interval: 10s
       timeout: 3s
       retries: 5
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  sqlite-web:
+    image: ghcr.io/coleifer/sqlite-web:latest
+    container_name: nucleaus-sqlite-web
+    restart: unless-stopped
+    command: ["-H", "0.0.0.0", "-x", "/data/nucleaus.db"]
+    volumes:
+      - hub-data:/data
+    ports:
+      - "${SQLITE_WEB_PORT:-1297}:8080"
+    networks:
+      - nucleus
+    depends_on:
+      hub:
+        condition: service_started
+
+networks:
+  nucleus:
+    driver: bridge
+  monitoring:
+    external: true
+    name: monitoring
 
 volumes:
-  db-data:
+  hub-data:
+

@@ -1,0 +1,95 @@
+{{define "gitlab_page"}}{{template "head" .}}
+
+<div class="page-head">
+  <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span><a href="/curriculum">Curriculum</a><span aria-hidden="true">/</span><span class="grad">Git Lab</span></p>
+  <h1 class="page-title grad">Git Recovery Lab</h1>
+  <p class="page-sub">Six broken repositories. Read the graph, type the git command, and repair history before the branch is lost. Every mission explains what to check, what to run, and what the result should look like.</p>
+</div>
+
+<section class="lab" id="gitlab" aria-label="Git recovery missions">
+  <aside class="lab-panel lab-missions">
+    <p class="lab-kicker">Missions</p>
+    <ol id="lab-missions"></ol>
+    <div class="lab-score">
+      <span>Rating</span>
+      <span id="lab-stars" aria-label="Current score">&#9733;&#9733;&#9733;</span>
+    </div>
+    <button class="lab-reset" id="lab-reset" type="button">Reset lab progress</button>
+  </aside>
+
+  <div class="lab-stage">
+    <header class="lab-brief">
+      <div class="lab-brief-top">
+        <span class="lab-tag" id="lab-tag">Loading</span>
+        <span id="lab-difficulty"></span>
+        <span id="lab-progress"></span>
+      </div>
+      <h2 class="lab-title" id="lab-title">Loading mission</h2>
+      <p id="lab-brief">Preparing the repository graph…</p>
+      <ul class="lab-objectives" id="lab-objectives"></ul>
+    </header>
+
+    <div class="lab-graph" id="lab-graph" aria-label="Animated commit graph">
+      <svg id="lab-edges" aria-hidden="true"></svg>
+      <div id="lab-nodes"></div>
+    </div>
+
+    <div class="lab-facts" aria-label="Repository state">
+      <div class="lab-fact"><span>BRANCH</span><strong id="lab-branch">—</strong></div>
+      <div class="lab-fact"><span>HEAD</span><strong id="lab-head">—</strong></div>
+      <div class="lab-fact"><span>REMOTE</span><strong id="lab-remote">—</strong></div>
+      <div class="lab-fact"><span>STATE</span><strong class="lab-state" id="lab-state">—</strong></div>
+    </div>
+
+    <div class="lab-console">
+      <div class="lab-console-head" aria-hidden="true">
+        <i></i><i></i><i></i><span>git@recovery-lab</span>
+      </div>
+      <div class="lab-log" id="lab-log" role="log" aria-live="polite" aria-label="Terminal output"></div>
+      <form class="lab-form" id="lab-form" autocomplete="off">
+        <label class="sr-only" for="lab-input">Git command</label>
+        <span class="lab-prompt" aria-hidden="true">$</span>
+        <input id="lab-input" name="command" type="text" placeholder="type a git command, e.g. git status" spellcheck="false" autocapitalize="off" />
+        <button class="lab-run" type="submit">RUN</button>
+      </form>
+      <div class="lab-tools">
+        <button class="lab-btn" id="lab-hint" type="button">Hint</button>
+        <button class="lab-btn" id="lab-reveal" type="button">Show command</button>
+        <button class="lab-btn" id="lab-restart" type="button">Restart mission</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="lab-panel lab-debrief">
+    <p class="lab-kicker">Field notes</p>
+    <h3 id="lab-note-title">Read the state first</h3>
+    <p id="lab-note-body">Every recovery starts with git status, git log, or git reflog. The graph shows what git already knows; the notes explain why the next command is safe.</p>
+    <div class="lab-note-rule"></div>
+    <p class="lab-kicker">Quick reference</p>
+    <div class="lab-cheats">
+      <div><code>git status</code><span>state</span></div>
+      <div><code>git log --oneline --graph</code><span>history</span></div>
+      <div><code>git reflog</code><span>safety net</span></div>
+      <div><code>git switch -c &lt;name&gt;</code><span>anchor work</span></div>
+      <div><code>git rebase --continue</code><span>after add</span></div>
+      <div><code>git revert HEAD</code><span>public undo</span></div>
+    </div>
+    <div class="lab-progress">Commands are simulated. Nothing touches your real repositories.</div>
+  </aside>
+</section>
+
+<div class="lab-win" id="lab-win" role="dialog" aria-modal="true" aria-labelledby="lab-win-title" hidden>
+  <div class="lab-win-card">
+    <p class="lab-win-kicker">Repository repaired</p>
+    <h2 id="lab-win-title">Mission complete</h2>
+    <p class="lab-win-stars" id="lab-win-stars">&#9733;&#9733;&#9733;</p>
+    <p id="lab-win-text"></p>
+    <div class="lab-win-actions">
+      <button class="lab-btn" id="lab-win-next" type="button">Next mission</button>
+      <button class="lab-btn" id="lab-win-close" type="button">Stay here</button>
+    </div>
+  </div>
+</div>
+
+<script src="{{asset "/static/gitlab.js"}}" defer></script>
+{{template "foot" .}}{{end}}

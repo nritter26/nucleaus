@@ -47,6 +47,46 @@ var curriculumTracks = []curriculumTrack{
 		File: "rust_curriculum_revised.md",
 		Desc: "Ownership, traits, and fearless systems code.",
 	},
+	{
+		Slug: "git", Name: "Git", Logo: "git", Dir: "git",
+		File: "git_curriculum.md",
+		Desc: "Version control from first commit to team workflow.",
+	},
+	{
+		Slug: "gin", Name: "Gin", Logo: "gin", Dir: "gin",
+		File: "gin_curriculum.md",
+		Desc: "Routing, middleware, and JSON services with Gin.",
+	},
+	{
+		Slug: "chi", Name: "Chi", Logo: "chi", Dir: "chi",
+		File: "chi_curriculum.md",
+		Desc: "Lightweight, idiomatic routers on net/http.",
+	},
+	{
+		Slug: "hono", Name: "Hono", Logo: "hono", Dir: "hono",
+		File: "hono_curriculum.md",
+		Desc: "Ultrafast JavaScript apps on any runtime.",
+	},
+	{
+		Slug: "echo", Name: "Echo", Logo: "echo", Dir: "echo",
+		File: "echo_curriculum.md",
+		Desc: "Minimal but extensible Go web services.",
+	},
+	{
+		Slug: "fiber", Name: "Fiber", Logo: "fiber", Dir: "fiber",
+		File: "fiber_curriculum.md",
+		Desc: "Express-style routing and middleware in Go.",
+	},
+	{
+		Slug: "vue", Name: "Vue", Logo: "vue", Dir: "vue",
+		File: "vue_curriculum.md",
+		Desc: "Vue 3 composition API with TypeScript.",
+	},
+	{
+		Slug: "redis", Name: "Redis", Logo: "redis", Dir: "redis",
+		File: "redis_curriculum.md",
+		Desc: "Redis with Go: caching, streams, and queues.",
+	},
 }
 
 // docResourceSource is a curated, verified pointer to official
@@ -90,6 +130,39 @@ var curriculumResources = map[string][]docResourceSource{
 		{Kind: "DOCS", Name: "Rustlings", URL: "https://github.com/rust-lang/rustlings", Desc: "Official small exercises to get you reading and writing Rust."},
 		{Kind: "VIDEO", Name: "Rust Programming – Full Course", URL: "https://www.youtube.com/watch?v=BpPEoZW5IiY", Desc: "freeCodeCamp · complete Rust course for beginners (6h)."},
 	},
+	"git": {
+		{Kind: "DOCS", Name: "Pro Git Book", URL: "https://git-scm.com/book/en/v2", Desc: "The complete official Git book, free online, every edition."},
+		{Kind: "DOCS", Name: "Official Git Reference", URL: "https://git-scm.com/docs", Desc: "Every command, option, and plumbing detail from git-scm."},
+		{Kind: "VIDEO", Name: "Git and GitHub for Beginners", URL: "https://www.youtube.com/watch?v=RGOj5yH7evk", Desc: "freeCodeCamp · crash course covering the full workflow (1h)."},
+	},
+	"gin": {
+		{Kind: "DOCS", Name: "Gin Web Framework Docs", URL: "https://gin-gonic.com/docs/", Desc: "Official documentation: routing, middleware, and deployment."},
+		{Kind: "DOCS", Name: "Gin GitHub Repository", URL: "https://github.com/gin-gonic/gin", Desc: "Source, examples, benchmarks, and the issue tracker."},
+	},
+	"chi": {
+		{Kind: "DOCS", Name: "Chi Router Docs", URL: "https://go-chi.io/", Desc: "Official site: middleware, routing, and design philosophy."},
+		{Kind: "DOCS", Name: "Chi GitHub Repository", URL: "https://github.com/go-chi/chi", Desc: "Examples for REST APIs, middlewares, and graceful shutdown."},
+	},
+	"hono": {
+		{Kind: "DOCS", Name: "Hono Documentation", URL: "https://hono.dev/docs/", Desc: "Official docs: routers, middleware, and runtime adapters."},
+		{Kind: "DOCS", Name: "Hono GitHub Repository", URL: "https://github.com/honojs/hono", Desc: "Source, examples, and middleware ecosystem."},
+	},
+	"echo": {
+		{Kind: "DOCS", Name: "Echo Docs", URL: "https://echo.labstack.com/docs", Desc: "Official guide: routing, middleware, request and response handling."},
+		{Kind: "DOCS", Name: "Echo Recipes", URL: "https://echo.labstack.com/docs/recipes", Desc: "Official recipes: CRUD APIs, websockets, file uploads, auth."},
+	},
+	"fiber": {
+		{Kind: "DOCS", Name: "Fiber Docs", URL: "https://docs.gofiber.io/", Desc: "Official documentation: routing, middleware, and optimizations."},
+		{Kind: "DOCS", Name: "Fiber GitHub Repository", URL: "https://github.com/gofiber/fiber", Desc: "Source, examples, and the middleware ecosystem."},
+	},
+	"vue": {
+		{Kind: "DOCS", Name: "Vue 3 Guide", URL: "https://vuejs.org/guide/introduction.html", Desc: "The official guide: reactivity, components, and composition API."},
+		{Kind: "DOCS", Name: "Vue TypeScript Docs", URL: "https://vuejs.org/guide/typescript/overview.html", Desc: "Official TypeScript support, typing props, and composables."},
+	},
+	"redis": {
+		{Kind: "DOCS", Name: "Redis Docs", URL: "https://redis.io/docs/latest/", Desc: "Official documentation: data types, persistence, and clients."},
+		{Kind: "DOCS", Name: "go-redis Client", URL: "https://redis.io/docs/latest/develop/clients/go/", Desc: "Official Go client guide and connection patterns."},
+	},
 }
 
 func findTrack(slug string) (curriculumTrack, bool) {
@@ -112,7 +185,11 @@ func buildCurriculum(slug string) (docView, error) {
 	}
 	doc, err := readDocFile(filepath.Join(curriculumRoot(), track.Dir, track.File))
 	if err != nil {
-		return docView{}, err
+		// Archived tracks keep rendering from the docs/backup archive.
+		doc, err = readDocFile(filepath.Join(curriculumRoot(), "backup", track.Dir, track.File))
+		if err != nil {
+			return docView{}, fmt.Errorf("read curriculum %s: %w", track.Slug, err)
+		}
 	}
 	group := docGroupView{
 		Slug:     track.Slug,
@@ -122,6 +199,13 @@ func buildCurriculum(slug string) (docView, error) {
 		Sections: sectionsFromDoc(doc),
 	}
 	group.Count = len(group.Sections)
+	lessons, minutes := 0, 0
+	for _, sec := range group.Sections {
+		minutes += sec.Minutes
+		if sec.Lesson {
+			lessons++
+		}
+	}
 	resources := make([]docResource, 0, len(curriculumResources[track.Slug]))
 	for _, r := range curriculumResources[track.Slug] {
 		resources = append(resources, docResource{Kind: r.Kind, Name: r.Name, URL: r.URL, Desc: r.Desc})
@@ -131,7 +215,10 @@ func buildCurriculum(slug string) (docView, error) {
 		Label:     track.Name,
 		Desc:      track.Desc,
 		Logo:      track.Logo,
+		Kind:      "curriculum",
 		Count:     group.Count,
+		Lessons:   lessons,
+		Minutes:   minutes,
 		Tabs:      []docGroupView{group},
 		Resources: resources,
 	}, nil
@@ -157,9 +244,6 @@ func handleCurriculumDoc(w http.ResponseWriter, r *http.Request) {
 	}
 	Render(w, "doc_page", data)
 }
-
-// The snippets tab groups the fragment vault under a language key (Go
-// helpers/scaffolds, Postgres DDL, ...) with one tab per source document.
 
 var snippetLanguages = []struct {
 	Key  string
@@ -238,7 +322,7 @@ func buildSnippets(lang string) (docView, error) {
 	}
 
 	tabs := make([]docGroupView, 0, len(files))
-	sections := 0
+	sections, minutes := 0, 0
 	for _, name := range sortDocFiles(files) {
 		doc, err := readDocFile(filepath.Join(snippetsRoot(), name))
 		if err != nil {
@@ -248,6 +332,9 @@ func buildSnippets(lang string) (docView, error) {
 		tab := group
 		tab.Count = len(group.Sections)
 		sections += len(group.Sections)
+		for _, sec := range group.Sections {
+			minutes += sec.Minutes
+		}
 		tabs = append(tabs, tab)
 	}
 	if len(tabs) == 0 {
@@ -255,12 +342,14 @@ func buildSnippets(lang string) (docView, error) {
 	}
 
 	return docView{
-		Slug:  meta.Key,
-		Label: meta.Name,
-		Desc:  meta.Desc,
-		Logo:  meta.Logo,
-		Count: sections,
-		Tabs:  tabs,
+		Slug:    meta.Key,
+		Label:   meta.Name,
+		Desc:    meta.Desc,
+		Logo:    meta.Logo,
+		Kind:    "snippets",
+		Count:   sections,
+		Minutes: minutes,
+		Tabs:    tabs,
 	}, nil
 }
 
@@ -269,52 +358,6 @@ type errNoSnippets struct{ kind string }
 func (e errNoSnippets) Error() string { return "no snippet docs for " + e.kind }
 
 var errNoSnippet = errNoSnippets{}
-
-func handleSnippetDoc(w http.ResponseWriter, r *http.Request) {
-	slug := r.PathValue("slug")
-
-	known := false
-	for _, l := range snippetLanguages {
-		if l.Key == slug {
-			known = true
-			break
-		}
-	}
-	if !known {
-		notFound(w)
-		return
-	}
-
-	view, err := docStore.load("snippets:"+slug, buildSnippets)
-	if err != nil {
-		if err == errNoSnippet {
-			// Languages whose source docs have not landed yet keep their
-			// "pending" placeholder.
-			group, ok := findGroup("snippets")
-			if ok {
-				if item, ok := findLink(group, "/snippets/"+slug); ok {
-					item.Meta = "PENDING"
-					renderSoon(w, group, item, "Snippet")
-					return
-				}
-			}
-			notFound(w)
-			return
-		}
-	}
-
-	data := pageData{
-		Title: view.Label + " · Snippet",
-		Page:  "snippets",
-		Nav:   nav(),
-		Trail: "Snippet",
-		Doc:   &view,
-	}
-	if err != nil && err != errNoSnippet {
-		data.Doc.Error = err.Error()
-	}
-	Render(w, "doc_page", data)
-}
 
 // renderSoon draws the "module pending" page used while a track has no docs.
 func renderSoon(w http.ResponseWriter, g group, item link, trail string) {

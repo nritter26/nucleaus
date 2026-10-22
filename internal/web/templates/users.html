@@ -1,6 +1,7 @@
 {{define "users_page"}} {{template "head" .}}
 <h1>Users</h1>
 <form
+  class="users-form"
   hx-post="/users"
   hx-target="#users"
   hx-swap="beforeend"

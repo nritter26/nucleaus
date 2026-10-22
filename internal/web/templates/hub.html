@@ -7,6 +7,9 @@
       <h1 class="telemetry-title">System load</h1>
     </div>
     <div class="telemetry-actions">
+      <a class="btn btn-ghost btn-sm" href="http://192.168.1.121:8092/ignis/" target="_blank" rel="noopener noreferrer" aria-label="Open Plane">
+        Plane<span class="arrow" aria-hidden="true">↗</span>
+      </a>
       <div class="window-switch" role="group" aria-label="Time window">
         <button type="button" data-window="5m">5m</button>
         <button type="button" data-window="15m">15m</button>
@@ -95,7 +98,7 @@
   </p>
 </section>
 
-<script src="/static/dashboard.js" defer></script>
+<script src="{{asset "/static/dashboard.js"}}" defer></script>
 {{template "foot" .}}{{end}}
 
 
@@ -112,7 +115,7 @@
       <span class="card-sheen" aria-hidden="true"></span>
       <span class="card-top">
         <span class="card-icon">
-          {{if $l.Logo}}<img src="/logos/{{$l.Logo}}.png" alt="" loading="lazy" />{{else}}<span class="monogram">{{$l.Initials}}</span>{{end}}
+          {{if $l.Logo}}<img src="{{asset (printf "/logos/%v.png" $l.Logo)}}" alt="" loading="lazy" />{{else}}<span class="monogram">{{$l.Initials}}</span>{{end}}
         </span>
         {{if $l.Meta}}<span class="card-meta">{{$l.Meta}}</span>{{end}}
       </span>
@@ -155,7 +158,7 @@
     <a class="tile reveal" style="--i: {{$j}}" href="{{$item.URL}}">
       <span class="tile-glow" aria-hidden="true"></span>
       <span class="tile-icon">
-        {{if $item.Logo}}<img src="/logos/{{$item.Logo}}.png" alt="" loading="lazy" />{{else}}<span class="monogram monogram--lg">{{$item.Initials}}</span>{{end}}
+        {{if $item.Logo}}<img src="{{asset (printf "/logos/%v.png" $item.Logo)}}" alt="" loading="lazy" />{{else}}<span class="monogram monogram--lg">{{$item.Initials}}</span>{{end}}
       </span>
       <span class="tile-name">{{$item.Name}}</span>
       <span class="tile-desc">{{$item.Desc}}</span>
@@ -232,7 +235,7 @@
 
 {{end}}
 
-<script src="/static/cheatsheet.js" defer></script>
+<script src="{{asset "/static/cheatsheet.js"}}" defer></script>
 
 {{template "foot" .}}{{end}}
 
@@ -242,9 +245,9 @@
 <div class="page-head">
   <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span><span>{{.Trail}}</span><span aria-hidden="true">/</span><span class="grad">{{.Doc.Label}}</span></p>
   <h1 class="page-title grad">
-    {{if .Doc.Logo}}<img class="page-logo" src="/logos/{{.Doc.Logo}}.png" alt="" loading="lazy" />{{end}}{{.Doc.Label}}
+    {{if .Doc.Logo}}<img class="page-logo" src="{{asset (printf "/logos/%v.png" .Doc.Logo)}}" alt="" loading="lazy" />{{end}}{{.Doc.Label}}
   </h1>
-  <p class="page-sub">{{.Doc.Desc}}</p>
+  <p class="page-sub">{{.Doc.Desc}}{{if .Doc.Minutes}} <span class="page-sub-meta">· ~{{.Doc.Minutes}} min read</span>{{end}}</p>
 </div>
 
 {{if .Doc.Error}}
@@ -267,6 +270,22 @@
   </a>
   {{end}}
 </aside>
+{{end}}
+
+{{if and (eq .Doc.Kind "curriculum") .Doc.Lessons}}
+<section class="doc-progress" data-progress="{{.Doc.Slug}}" data-total="{{.Doc.Lessons}}" aria-label="Course progress">
+  <div class="doc-progress-head">
+    <span class="doc-progress-title"><strong id="doc-progress-done">0</strong> / {{.Doc.Lessons}} lessons complete</span>
+    <button type="button" class="doc-progress-reset" id="doc-progress-reset">Reset progress</button>
+  </div>
+  <div class="doc-progress-track" id="doc-progress-track" role="progressbar" aria-label="Lessons complete" aria-valuemin="0" aria-valuemax="{{.Doc.Lessons}}" aria-valuenow="0">
+    <span id="doc-progress-bar"></span>
+  </div>
+  <div class="doc-progress-foot">
+    <span class="doc-progress-hint">Progress is saved in this browser.</span>
+    <a class="doc-progress-next" id="doc-progress-next" hidden>Continue</a>
+  </div>
+</section>
 {{end}}
 
 <div class="cheat-controls">
@@ -294,12 +313,23 @@
       <span>{{.Count}} sections</span>
     </header>
     {{range $i, $s := .Sections}}
-    <details class="doc-sec reveal" style="--i: {{$i}}" id="{{$s.ID}}" data-search="{{$s.Query}}"{{if $s.Open}} open{{end}} data-first="{{if eq $i 0}}1{{else}}0{{end}}">
+    <details class="doc-sec reveal" style="--i: {{$i}}" id="{{$s.ID}}" data-search="{{$s.Query}}" data-lesson="{{if $s.Lesson}}1{{else}}0{{end}}"{{if $s.Open}} open{{end}} data-first="{{if eq $i 0}}1{{else}}0{{end}}">
       <summary>
         <span class="doc-sec-name">{{$s.Heading}}</span>
-        {{if $s.Count}}<span class="doc-sec-count">{{$s.Count}} snippets</span>{{end}}
+        {{if $s.Note}}<span class="doc-sec-note">{{$s.Note}}</span>{{end}}
+        {{if $s.Minutes}}<span class="doc-sec-time">~{{$s.Minutes}} min</span>{{end}}
+        {{if $s.Count}}<span class="doc-sec-count">{{$s.Count}} code</span>{{end}}
+        {{if $s.Editable}}<span class="doc-sec-admin"><a href="/snippets/manage/{{$s.SnippetID}}/edit">edit</a></span>{{end}}
       </summary>
       <div class="doc-body">{{$s.Body}}</div>
+      {{if and (eq $.Doc.Kind "curriculum") $s.Lesson}}
+      <div class="doc-done-row">
+        <button class="doc-done" type="button" data-done="{{$s.ID}}" aria-pressed="false">
+          <span class="doc-done-mark" aria-hidden="true"></span>
+          <span class="doc-done-label">Mark lesson complete</span>
+        </button>
+      </div>
+      {{end}}
     </details>
     {{end}}
   </section>
@@ -310,7 +340,7 @@
 
 {{end}}
 
-<script src="/static/docs.js" defer></script>
+<script src="{{asset "/static/docs.js"}}" defer></script>
 
 {{template "foot" .}}{{end}}
 
@@ -319,7 +349,7 @@
 
 <div class="page-head">
   <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span><span>AI Tools</span><span aria-hidden="true">/</span><span class="grad">TTS</span></p>
-  <h1 class="page-title grad"><img class="page-logo" src="/logos/tts.png" alt="" />Curriculum read-aloud</h1>
+  <h1 class="page-title grad"><img class="page-logo" src="{{asset "/logos/tts.png"}}" alt="" />Curriculum read-aloud</h1>
   <p class="page-sub">Every learning track narrated in a natural voice. Pick a section, set the pace, and let it play.</p>
 </div>
 
@@ -391,16 +421,208 @@
   {{end}}
 </section>
 
-<script src="/static/tts.js" defer></script>
+<script src="{{asset "/static/tts.js"}}" defer></script>
 
 {{template "foot" .}}{{end}}
+
+{{define "snippets_page"}}{{template "head" .}}
+
+<div class="page-head">
+  <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span>{{.Group.Label}}</p>
+  <h1 class="page-title grad">{{.Group.Label}}</h1>
+  <p class="page-sub">{{.Group.Blurb}}</p>
+</div>
+
+<div class="vault-actions">
+  <a class="btn btn-ghost btn-sm" href="/snippets/new">Add snippet</a>
+  <a class="btn btn-ghost btn-sm" href="/snippets/manage">Manage snippets</a>
+  <a class="btn btn-ghost btn-sm" href="/labels">Labels</a>
+</div>
+
+<section class="tiles">
+  {{range $i, $l := .Groups}}
+    {{range $j, $item := $l.Items}}
+    <a class="tile reveal" style="--i: {{$j}}" href="{{$item.URL}}">
+      <span class="tile-glow" aria-hidden="true"></span>
+      <span class="tile-icon">
+        {{if $item.Logo}}<img src="{{asset (printf "/logos/%v.png" $item.Logo)}}" alt="" loading="lazy" />{{else}}<span class="monogram monogram--lg">{{$item.Initials}}</span>{{end}}
+      </span>
+      <span class="tile-name">{{$item.Name}}</span>
+      <span class="tile-desc">{{$item.Desc}}</span>
+      <span class="tile-go">Enter<span aria-hidden="true">→</span></span>
+    </a>
+    {{end}}
+  {{end}}
+</section>
+
+{{template "foot" .}}{{end}}
+
+
+{{define "snippet_form_page"}}{{template "head" .}}
+
+<div class="page-head">
+  <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span><span>Snippet</span><span aria-hidden="true">/</span><span class="grad">{{if .Snip}}Edit snippet{{else}}New snippet{{end}}</span></p>
+  <h1 class="page-title grad">{{if .Snip}}Edit snippet{{else}}Add snippet{{end}}</h1>
+  <p class="page-sub">Markdown in, vault section out. Wrap raw code in fenced blocks.</p>
+</div>
+
+{{if not .HasDB}}
+<div class="cheat-empty"><p>The snippet database is not wired up.</p></div>
+{{else}}
+
+{{if .SnipError}}<div class="cheat-empty"><p class="cheat-error">{{.SnipError}}</p></div>{{end}}
+
+<form class="admin-panel" method="post" action="{{if .Snip}}/snippets/manage/{{.Snip.ID}}{{else}}/snippets{{end}}">
+  <label class="admin-field">
+    <span>Title</span>
+    <input type="text" name="title" required value="{{with .Snip}}{{.Title}}{{end}}" placeholder="Retry helper with backoff" />
+  </label>
+  <div class="admin-row">
+    <label class="admin-field">
+      <span>Label</span>
+      <select name="label_id">
+        <option value="0">— none —</option>
+        {{range .Labels}}<option value="{{.ID}}"{{if and $.Snip $.Snip.LabelID.Valid}}{{if eq $.Snip.LabelID.Int64 .ID}} selected{{end}}{{end}}>{{.Name}}</option>{{end}}
+      </select>
+    </label>
+    <label class="admin-field">
+      <span>Language (highlighting)</span>
+      <input type="text" name="lang" value="{{with .Snip}}{{.Lang}}{{end}}" placeholder="go, typescript, bash…" />
+    </label>
+  </div>
+  <label class="admin-field">
+    <span>Code (markdown; sections get a heading automatically)</span>
+    <textarea name="code" rows="14" required spellcheck="false" placeholder="```go&#10;func Retry(ctx context.Context, fn func() error) error { … }&#10;```">{{with .Snip}}{{.Code}}{{end}}</textarea>
+  </label>
+  <label class="admin-field">
+    <span>Notes (optional)</span>
+    <textarea name="notes" rows="3" placeholder="Caveats, provenance, links…">{{with .Snip}}{{.Notes}}{{end}}</textarea>
+  </label>
+  <div class="admin-actions">
+    <button class="btn btn-ghost btn-sm" type="submit">Save snippet</button>
+    <a class="btn btn-ghost btn-sm" href="/snippets/manage">Cancel</a>
+  </div>
+</form>
+{{end}}
+
+{{template "foot" .}}{{end}}
+
+
+{{define "snippet_manage_page"}}{{template "head" .}}
+
+<div class="page-head">
+  <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span><span>Snippet</span><span aria-hidden="true">/</span><span class="grad">Manage</span></p>
+  <h1 class="page-title grad">Manage snippets</h1>
+  <p class="page-sub">Update, remove, or extend vault rows stored in the database.</p>
+</div>
+
+<div class="vault-actions">
+  <a class="btn btn-ghost btn-sm" href="/snippets/new">Add snippet</a>
+  <a class="btn btn-ghost btn-sm" href="/labels">Labels</a>
+</div>
+
+{{if not .HasDB}}
+<div class="cheat-empty"><p>The snippet database is not wired up.</p></div>
+{{else}}
+
+{{if .SnipRows}}
+<div class="table-card">
+  <div class="table-head">
+    <h2>Stored snippets</h2>
+    <span>{{len .SnipRows}} rows</span>
+  </div>
+  <div class="table-scroll">
+    <table class="ctable admin-table">
+      <thead>
+        <tr><th>Title</th><th>Label</th><th>Lang</th><th>Source</th><th></th></tr>
+      </thead>
+      <tbody>
+        {{range .SnipRows}}
+        <tr>
+          <td><a href="/snippets/manage/{{.ID}}/edit">{{.Title}}</a></td>
+          <td>{{.LabelName}}</td>
+          <td>{{.Lang}}</td>
+          <td>{{.Source}}</td>
+          <td class="admin-row-actions">
+            <a class="admin-link" href="/snippets/manage/{{.ID}}/edit">edit</a>
+            <form method="post" action="/snippets/manage/{{.ID}}/delete">
+              <button class="admin-link admin-link--danger" type="submit">delete</button>
+            </form>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+</div>
+{{else}}
+<div class="cheat-empty"><p>No snippets stored yet. <a href="/snippets/new">Add the first one</a>.</p></div>
+{{end}}
+{{end}}
+
+{{template "foot" .}}{{end}}
+
+
+{{define "labels_page"}}{{template "head" .}}
+
+<div class="page-head">
+  <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span><span>Snippet</span><span aria-hidden="true">/</span><span class="grad">Labels</span></p>
+  <h1 class="page-title grad">Snippet labels</h1>
+  <p class="page-sub">Enum categories stored in the database for classifying snippets.</p>
+</div>
+
+{{if not .HasDB}}
+<div class="cheat-empty"><p>The snippet database is not wired up.</p></div>
+{{else}}
+
+<form class="admin-panel" method="post" action="/labels">
+  <div class="admin-row">
+    <label class="admin-field admin-field--grow">
+      <span>New label</span>
+      <input type="text" name="name" required placeholder="Observability" />
+    </label>
+    <button class="btn btn-ghost btn-sm" type="submit">Add label</button>
+  </div>
+</form>
+
+<div class="table-card">
+  <div class="table-head">
+    <h2>Labels</h2>
+    <span>{{len .Labels}} defined</span>
+  </div>
+  <div class="table-scroll">
+    <table class="ctable admin-table">
+      <thead>
+        <tr><th>Name</th><th>Slug</th><th>Snippets</th><th></th></tr>
+      </thead>
+      <tbody>
+        {{range .Labels}}
+        <tr>
+          <td>{{.Name}}</td>
+          <td>{{.Slug}}</td>
+          <td>{{.Count}}</td>
+          <td class="admin-row-actions">
+            <form method="post" action="/labels/{{.ID}}/delete">
+              <button class="admin-link admin-link--danger" type="submit">delete</button>
+            </form>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+</div>
+{{end}}
+
+{{template "foot" .}}{{end}}
+
 
 {{define "soon_page"}}{{template "head" .}}
 
 <section class="soon">
   <div class="soon-panel reveal">
     <div class="soon-logo">
-      {{if .Item.Logo}}<img src="/logos/{{.Item.Logo}}.png" alt="" />{{else}}<span class="monogram monogram--xl">{{.Item.Initials}}</span>{{end}}
+      {{if .Item.Logo}}<img src="{{asset (printf "/logos/%v.png" .Item.Logo)}}" alt="" />{{else}}<span class="monogram monogram--xl">{{.Item.Initials}}</span>{{end}}
       <span class="soon-scan" aria-hidden="true"></span>
     </div>
     <p class="eyebrow">{{if .Trail}}{{.Trail}} · {{end}}MODULE<strong class="soon-state">{{.Item.Meta}}</strong></p>
@@ -416,7 +638,7 @@
       <div class="soon-sibling-list">
         {{range .Siblings}}
         <a class="chip" href="{{.URL}}">
-          {{if .Logo}}<img src="/logos/{{.Logo}}.png" alt="" loading="lazy" />{{else}}<span class="monogram">{{.Initials}}</span>{{end}}
+          {{if .Logo}}<img src="{{asset (printf "/logos/%v.png" .Logo)}}" alt="" loading="lazy" />{{else}}<span class="monogram">{{.Initials}}</span>{{end}}
           {{.Name}}
         </a>
         {{end}}
@@ -427,5 +649,20 @@
     <a class="btn btn-ghost" href="/hub">Back to hub</a>
   </div>
 </section>
+
+{{template "foot" .}}{{end}}
+
+
+{{define "library_page"}}{{template "head" .}}
+
+<div class="page-head">
+  <p class="eyebrow"><a href="/hub">Hub</a><span aria-hidden="true">/</span><a href="/library">Library</a><span aria-hidden="true">/</span><span class="grad">{{.Doc.Label}}</span></p>
+  <h1 class="page-title grad">
+    {{if .Doc.Logo}}<img class="page-logo" src="{{asset (printf "/logos/%v.png" .Doc.Logo)}}" alt="" loading="lazy" />{{end}}{{.Doc.Label}} library
+  </h1>
+  <p class="page-sub">{{.Doc.Desc}}</p>
+</div>
+
+{{range .Groups}}{{template "group" .}}{{end}}
 
 {{template "foot" .}}{{end}}

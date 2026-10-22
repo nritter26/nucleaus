@@ -5,9 +5,8 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"nucleaus/internal/db"
 	"nucleaus/internal/middleware"
-	"nucleaus/internal/user"
+	"nucleaus/internal/snippets"
 	"nucleaus/internal/web"
 	"os"
 	"os/signal"
@@ -22,39 +21,46 @@ func main() {
 		log.Printf("no .env file found, using process environment")
 	}
 
-	dsn := os.Getenv("DATABASE_URL")
-	if dsn == "" {
-		log.Fatal("DATABASE_URL is not set")
-	}
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "2602"
 	}
 
+	if path := os.Getenv("SNIPPETS_DB"); path != "" {
+		store, err := snippets.Open(path)
+		if err != nil {
+			log.Fatalf("open snippets db: %v", err)
+		}
+		defer snippets.Close(store)
+		if err := store.Migrate(context.Background()); err != nil {
+			log.Fatalf("migrate snippets db: %v", err)
+		}
+		if path := os.Getenv("SNIPPETS_SEED"); path != "" {
+			raw, err := os.ReadFile(path)
+			if err != nil {
+				log.Fatalf("read snippets seed %s: %v", path, err)
+			}
+			if err := store.ApplySeed(context.Background(), string(raw)); err != nil {
+				log.Fatalf("seed snippets: %v", err)
+			}
+			log.Printf("snippets seed applied from %s", path)
+		}
+		web.SetSnippetStore(store)
+		log.Printf("snippets vault wired at %s", path)
+	}
+
 	sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-
-	client, err := db.NewClient(sigCtx, dsn)
-	if err != nil {
-	log.Fatalf("failed to connect to db: %v", err)
-	}
-	defer client.Close()
 
 	mux := http.NewServeMux()
 	web.RegisterStatic(mux)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
-	if err := client.Pool.Ping(r.Context()); err != nil {
-		http.Error(w, "db down", 503)
-		return
-	}
-	w.Write([]byte("ok"))
+		w.Write([]byte("ok"))
 	})
-	user.RegisterRoutes(mux, client.Pool)
 
 	srv := &http.Server{
-	Addr:    ":" + port,
-	Handler: middleware.Chain(mux, middleware.Recover, middleware.Logger),
+		Addr:              ":" + port,
+		Handler:           middleware.Chain(mux, middleware.Recover, middleware.Logger),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      45 * time.Second,
@@ -65,7 +71,7 @@ func main() {
 		log.Printf("server starting on :%s", port)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Printf("server error: %v", err)
-			stop() 
+			stop()
 		}
 	}()
 
